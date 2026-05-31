@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>외국인주민 프로그램 및 무료진료 수요조사</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .survey-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 650px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .lang-bar {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        .lang-label { font-size: 13px; color: #666; font-weight: bold; }
+        .lang-btn {
+            padding: 6px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .lang-btn:hover { border-color: #667eea; color: #667eea; }
+        .lang-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+        .progress-bar { height: 6px; background: #e0e0e0; }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        .progress-text {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #666;
+            background: #f8f9fa;
+        }
+        .step {
+            display: none;
+            padding: 35px 30px;
+            animation: fadeIn 0.4s ease;
+        }
+        .step.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 36px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        h2 { font-size: 20px; color: #333; margin-bottom: 6px; line-height: 1.4; }
+        .subtitle { font-size: 13px; color: #888; margin-bottom: 20px; line-height: 1.5; }
+        .eng-subtitle { font-size: 12px; color: #aaa; font-style: italic; margin-bottom: 15px; }
+        .question-trans {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 500;
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: #f0f2ff;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            display: none;
+        }
+        .question-trans.show { display: block; animation: slideDown 0.3s ease; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-card {
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .option-card:hover { border-color: #667eea; background: #f8f9ff; transform: translateX(5px); }
+        .option-card.selected { border-color: #667eea; background: #f0f2ff; }
+        .check-circle {
+            width: 22px; height: 22px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .option-card.selected .check-circle { border-color: #667eea; background: #667eea; }
+        .check-circle::after { content: '✓'; color: white; font-size: 12px; display: none; }
+        .option-card.selected .check-circle::after { display: block; }
+        .option-text { font-size: 14px; color: #333; }
+        .option-eng { font-size: 11px; color: #999; margin-top: 2px; }
+        .option-trans {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 3px;
+            font-weight: 500;
+            display: none;
+        }
+        .option-trans.show { display: block; }
+        .text-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .text-input:focus { outline: none; border-color: #667eea; }
+        .textarea-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .textarea-input:focus { outline: none; border-color: #667eea; }
+        .btn-group { display: flex; gap: 10px; margin-top: 25px; }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-prev { background: #f0f0f0; color: #666; }
+        .btn-prev:hover { background: #e0e0e0; }
+        .btn-next, .btn-submit {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-next:hover, .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .intro-step { text-align: center; padding: 45px 30px; }
+        .intro-icon { font-size: 55px; margin-bottom: 15px; }
+        .intro-step h1 { font-size: 22px; color: #333; margin-bottom: 8px; }
+        .intro-step p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 25px; }
+        .intro-message {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border-radius: 16px;
+            padding: 24px 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid #667eea;
+            text-align: left;
+        }
+        .intro-message p {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.8;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        .time-badge {
+            display: inline-block;
+            background: #f0f2ff;
+            color: #667eea;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .hint { font-size: 12px; color: #999; margin-top: 6px; }
+        .multi-select-hint {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #f57c00;
+            margin-bottom: 12px;
+        }
+        .age-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .age-card {
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .age-card:hover { border-color: #667eea; background: #f8f9ff; }
+        .age-card.selected { border-color: #667eea; background: #f0f2ff; }
+        .age-card .age-num { font-size: 22px; font-weight: bold; color: #333; }
+        .age-card .age-text { font-size: 12px; color: #888; margin-top: 3px; }
+        .age-card .age-trans {
+            font-size: 11px;
+            color: #667eea;
+            margin-top: 2px;
+            display: none;
+        }
+        .age-card .age-trans.show { display: block; }
+        .gender-cards { display: flex; gap: 12px; }
+        .gender-card {
+            flex: 1;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .gender-card:hover { border-color: #667eea; background: #f8f9ff; transform: translateY(-3px); }
+        .gender-card.selected { border-color: #667eea; background: #f0f2ff; }
+        .gender-card .gender-icon { font-size: 36px; margin-bottom: 8px; }
+        .gender-card .gender-text { font-size: 15px; font-weight: bold; color: #333; }
+        .gender-card .gender-eng { font-size: 11px; color: #999; margin-top: 3px; }
+        .gender-card .gender-trans {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 4px;
+            display: none;
+        }
+        .gender-card .gender-trans.show { display: block; }
+        .completion-step { text-align: center; padding: 50px 30px; }
+        .completion-icon { font-size: 70px; margin-bottom: 15px; }
+        .completion-step h2 { font-size: 24px; color: #333; margin-bottom: 12px; }
+        .completion-step p { font-size: 14px; color: #666; line-height: 1.6; }
+        .likert-scale { display: flex; gap: 8px; margin-top: 10px; }
+        .likert-item {
+            flex: 1;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .likert-item:hover { border-color: #667eea; background: #f8f9ff; }
+        .likert-item.selected { border-color: #667eea; background: #f0f2ff; }
+        .likert-item .likert-num { font-size: 20px; font-weight: bold; color: #333; }
+        .likert-item .likert-label { font-size: 11px; color: #888; margin-top: 4px; }
+        .likert-item .likert-trans {
+            font-size: 10px;
+            color: #667eea;
+            margin-top: 3px;
+            display: none;
+        }
+        .likert-item .likert-trans.show { display: block; }
+        @media (max-width: 480px) {
+            .age-grid { grid-template-columns: repeat(2, 1fr); }
+            .step { padding: 25px 20px; }
+            .likert-scale { flex-wrap: wrap; }
+            .likert-item { min-width: 60px; }
+            .lang-bar { padding: 10px 15px; }
+            .lang-btn { padding: 5px 10px; font-size: 11px; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="survey-container">
+        <div class="lang-bar" id="langBar" style="display:none;">
+            <span class="lang-label">🌐</span>
+            <button type="button" class="lang-btn active" data-action="set-lang" data-lang="ko" id="btn-ko">한국어</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="bn" id="btn-bn">বাংলা</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="km" id="btn-km">ខ្មែរ</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="my" id="btn-my">မြန်မာ</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="vi" id="btn-vi">Tiếng Việt</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="tl" id="btn-tl">Filipino</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="uz" id="btn-uz">O'zbek</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="id" id="btn-id">Bahasa</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="mn" id="btn-mn">Монгол</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="ne" id="btn-ne">नेपाली</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="si" id="btn-si">සිංහල</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="zh" id="btn-zh">中文</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="ky" id="btn-ky">Кыргызча</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="ru" id="btn-ru">Русский</button>
+            <button type="button" class="lang-btn" data-action="set-lang" data-lang="th" id="btn-th">ไทย</button>
+        </div>
+
+        
+        <div style="text-align: right; padding: 8px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0;">
+            <button type="button" data-action="admin-login" style="background: #667eea; color: white; border: none; padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer; font-family: inherit;">
+                🔐 관리자 모드
+            </button>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">1 / 14</div>
+
+        <!-- Step 0: Intro -->
+        <div class="step intro-step active" data-step="0">
+            <h1 data-ko="외국인주민 프로그램 및<br>무료진료 수요조사"
+                data-en="Needs Assessment Survey<br>for Foreign Residents"
+                data-bn="বিদেশী বাসিন্দাদের জন্য<br>চাহিদা মূল্যায়ন সমীক্ষা"
+                data-km="សម្រាប់ប្រជាជនបរទេស<br>ការស្ទង់មតិវាយតម្លៃតម្រូវការ"
+                data-my="နိုင်ငံခြားသားများအတွက်<br>လိုအပ်ချက် အကဲဖြတ်ခြင်း စစ်တမ်း"
+                data-vi="Khảo sát đánh giá nhu cầu<br>dành cho cư dân nước ngoài"
+                data-tl="Pagtatasa ng Pangangailangan<br>para sa Dayuhang Residente"
+                data-uz="Chet ellik aholilar uchun<br>ehtiyojlarni baholash so'rovi"
+                data-id="Penilaian Kebutuhan<br>untuk Penduduk Asing"
+                data-mn="Гадаадын иргэдийн хэрэгцээний<br>үнэлгээний судалгаа"
+                data-ne="विदेशी बासिन्दाहरूका लागि<br>आवश्यकता मूल्याङ्कन सर्वेक्षण"
+                data-si="විදේශිකයන් සඳහා<br>අවශ්‍යතා ඇගයීමේ සමීක්ෂණය"
+                data-zh="外国居民需求评估调查"
+                data-ky="Чет элдик жарандар үчүн<br>потребностулорду баалоо сурамжылоо"
+                data-ru="Оценка потребностей<br>для иностранных жителей"
+                data-th="การประเมินความต้องการ<br>สำหรับชาวต่างชาติ"
+                >외국인주민 프로그램 및<br>무료진료 수요조사</h1>
+            <p class="eng-subtitle">Needs Assessment Survey for Foreign Residents</p>
+            <div class="time-badge">⏱️ <span data-ko="약 4분 소요 | 10개 문항" data-en="About 4 min | 14 questions">약 4분 소요 | 10개 문항</span></div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-next" data-action="next" data-ko="설문 시작하기" data-en="Start Survey">설문 시작하기</button>
+            </div>
+        </div>
+        <!-- A1: Nationality -->
+        <div class="step" data-step="1">
+            <span class="step-number">A1</span>
+            <h2 data-ko="귀하의 국적은 어디입니까?"
+                data-en="What is your nationality?"
+                data-bn="আপনার জাতীয়তা কী?"
+                data-km="សញ្ញាតិរបស់អ្នកជាអ្វី?"
+                data-my="သင့်နိုင်ငံသားအဖြစ်က ဘာလဲ?"
+                data-vi="Quốc tịch của bạn là gì?"
+                data-tl="Ano ang iyong nasyonalidad?"
+                data-uz="Sizning fuqaroligingiz qanday?"
+                data-id="Apa kewarganegaraan Anda?"
+                data-mn="Таны иргэншил юу вэ?"
+                data-ne="तपाईंको राष्ट्रियता के हो?"
+                data-si="ඔබගේ ජාතිකත්වය කුමක්ද?"
+                data-zh="您的国籍是什么？"
+                data-ky="Сиздин жарандыгыңыз кандай?"
+                data-ru="Какая у вас гражданство?"
+                data-th="สัญชาติของคุณคืออะไร?"
+                >귀하의 국적은 어디입니까?</h2>
+            <p class="question-trans" id="qtrans-A1"></p>
+            <div class="option-card" data-action="select-nationality" data-value="1" data-code="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇧🇩 방글라데시</div>
+                    <div class="option-eng">Bangladesh</div>
+                    <div class="option-trans" data-bn="বাংলাদেশ" data-km="បង់গ্লাদেশ" data-my="ဘင်္ဂလားဒေ့ရ်" data-vi="Bangladesh" data-tl="Bangladesh" data-uz="Bangladesh" data-id="Bangladesh" data-mn="Бангладеш" data-ne="बंगलादेश" data-si="බංග්ලාදේශය" data-zh="孟加拉国" data-ky="Бангладеш" data-ru="Бангладеш" data-th="บังกลาเทศ">Bangladesh</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="2" data-code="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇰🇭 캄보디아</div>
+                    <div class="option-eng">Cambodia</div>
+                    <div class="option-trans" data-bn="কম্বোডিয়া" data-km="កម្ពុជា" data-my="ကမ္ဘောဒီးယား" data-vi="Campuchia" data-tl="Kambodya" data-uz="Kambodja" data-id="Kamboja" data-mn="Камбож" data-ne="कम्बोडिया" data-si="කාම්බෝජය" data-zh="柬埔寨" data-ky="Камбоджа" data-ru="Камбоджа" data-th="กัมพูชา">Cambodia</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="3" data-code="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇲🇲 미얀마</div>
+                    <div class="option-eng">Myanmar</div>
+                    <div class="option-trans" data-bn="মায়ানমার" data-km="មីយ៉ាន់ម៉ា" data-my="မြန်မာ" data-vi="Myanmar" data-tl="Myanmar" data-uz="Myanma" data-id="Myanmar" data-mn="Мьянмар" data-ne="म्यानमार" data-si="මියන්මාරය" data-zh="缅甸" data-ky="Мьянмар" data-ru="Мьянма" data-th="พม่า">Myanmar</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="4" data-code="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇻🇳 베트남</div>
+                    <div class="option-eng">Vietnam</div>
+                    <div class="option-trans" data-bn="ভিয়েতনাম" data-km="វៀតណាម" data-my="ဗီယက်နမ်" data-vi="Việt Nam" data-tl="Vietnam" data-uz="Vyetnam" data-id="Vietnam" data-mn="Вьетнам" data-ne="भियतनाम" data-si="වියට්නාමය" data-zh="越南" data-ky="Вьетнам" data-ru="Вьетнам" data-th="เวียดนาม">Vietnam</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="5" data-code="5">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇵🇭 필리핀</div>
+                    <div class="option-eng">Philippines</div>
+                    <div class="option-trans" data-bn="ফিলিপাইন" data-km="ហ្វីលីពីន" data-my="ဖိလစ်ပိုင်" data-vi="Philippines" data-tl="Pilipinas" data-uz="Filippin" data-id="Filipina" data-mn="Филиппин" data-ne="फिलिपिन्स" data-si="පිලිපීනය" data-zh="菲律宾" data-ky="Филиппин" data-ru="Филиппины" data-th="ฟิลิปปินส์">Philippines</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="6" data-code="6">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇺🇿 우즈베키스탄</div>
+                    <div class="option-eng">Uzbekistan</div>
+                    <div class="option-trans" data-bn="উজবেকিস্তান" data-km="អ៊ូហ្សបេគីស្ថាន" data-my="ဥဇဘက်ကစ္စတန်" data-vi="Uzbekistan" data-tl="Uzbekistan" data-uz="O'zbekiston" data-id="Uzbekistan" data-mn="Узбекистан" data-ne="उज्बेकिस्तान" data-si="උස්බෙකිස්තානය" data-zh="乌兹别克斯坦" data-ky="Өзбекстан" data-ru="Узбекистан" data-th="อุซเบกิสถาน">Uzbekistan</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="7" data-code="7">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇮🇩 인도네시아</div>
+                    <div class="option-eng">Indonesia</div>
+                    <div class="option-trans" data-bn="ইন্দোনেশিয়া" data-km="ឥណ្ឌូណេស៊ី" data-my="အင်ဒိုနီးရှား" data-vi="Indonesia" data-tl="Indonesia" data-uz="Indoneziya" data-id="Indonesia" data-mn="Индонез" data-ne="इन्डोनेसिया" data-si="ඉන්දුනීසියාව" data-zh="印度尼西亚" data-ky="Индонезия" data-ru="Индонезия" data-th="อินโดนีเซีย">Indonesia</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="8" data-code="8">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇲🇳 몽골</div>
+                    <div class="option-eng">Mongolia</div>
+                    <div class="option-trans" data-bn="মঙ্গোলিয়া" data-km="ម៉ុងហ្គោលី" data-my="မွန်ဂိုးလီးယား" data-vi="Mông Cổ" data-tl="Mongolia" data-uz="Mongoliya" data-id="Mongolia" data-mn="Монгол" data-ne="मंगोलिया" data-si="මොංගෝලියාව" data-zh="蒙古" data-ky="Монголия" data-ru="Монголия" data-th="มองโกเลีย">Mongolia</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="9" data-code="9">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇳🇵 네팔</div>
+                    <div class="option-eng">Nepal</div>
+                    <div class="option-trans" data-bn="নেপাল" data-km="នេប៉ាល់" data-my="နီပေါ" data-vi="Nepal" data-tl="Nepal" data-uz="Nepal" data-id="Nepal" data-mn="Непал" data-ne="नेपाल" data-si="නේපාලය" data-zh="尼泊尔" data-ky="Непал" data-ru="Непал" data-th="เนปาล">Nepal</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="10" data-code="10">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇱🇰 스리랑카</div>
+                    <div class="option-eng">Sri Lanka</div>
+                    <div class="option-trans" data-bn="শ্রীলঙ্কা" data-km="ស្រីលង្កា" data-my="သီရိလင်္ကာ" data-vi="Sri Lanka" data-tl="Sri Lanka" data-uz="Shri-Lanka" data-id="Sri Lanka" data-mn="Шри-Ланк" data-ne="श्रीलंका" data-si="ශ්‍රී ලංකාව" data-zh="斯里兰卡" data-ky="Шри-Ланка" data-ru="Шри-Ланка" data-th="ศรีลังกา">Sri Lanka</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="11" data-code="11">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇨🇳 중국</div>
+                    <div class="option-eng">China</div>
+                    <div class="option-trans" data-bn="চীন" data-km="ចិន" data-my="တရုတ်" data-vi="Trung Quốc" data-tl="Tsina" data-uz="Xitoy" data-id="Tiongkok" data-mn="Хятад" data-ne="चीन" data-si="චීනය" data-zh="中国" data-ky="Кытай" data-ru="Китай" data-th="จีน">China</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="12" data-code="12">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇰🇬 키르기스스탄</div>
+                    <div class="option-eng">Kyrgyzstan</div>
+                    <div class="option-trans" data-bn="কিরগিজস্তান" data-km="កៀហ្ស៊ីស៊ីស្ថាន" data-my="ကာဂျစ်စတန်" data-vi="Kyrgyzstan" data-tl="Kyrgyzstan" data-uz="Qirg'iziston" data-id="Kirgizstan" data-mn="Киргиз" data-ne="किर्गिस्तान" data-si="කිර්ගිස්තානය" data-zh="吉尔吉斯斯坦" data-ky="Кыргызстан" data-ru="Киргизия" data-th="คีร์กีซสถาน">Kyrgyzstan</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="13" data-code="13">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇷🇺 러시아</div>
+                    <div class="option-eng">Russia</div>
+                    <div class="option-trans" data-bn="রাশিয়া" data-km="រុស្ស៊ី" data-my="ရုရှား" data-vi="Nga" data-tl="Russia" data-uz="Rossiya" data-id="Rusia" data-mn="Орос" data-ne="रुस" data-si="රුසියාව" data-zh="俄罗斯" data-ky="Орусия" data-ru="Россия" data-th="รัสเซีย">Russia</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="14" data-code="14">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🇹🇭 태국</div>
+                    <div class="option-eng">Thailand</div>
+                    <div class="option-trans" data-bn="থাইল্যান্ড" data-km="ថៃ" data-my="ထိုင်း" data-vi="Thái Lan" data-tl="Thailand" data-uz="Tailand" data-id="Thailand" data-mn="Тайланд" data-ne="थाइल्यान्ड" data-si="තායිලන්තය" data-zh="泰国" data-ky="Таиланд" data-ru="Таиланд" data-th="ไทย">Thailand</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-nationality" data-value="99" data-code="99">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🌍 기타 국적</div>
+                    <div class="option-eng">Other nationality</div>
+                    <div class="option-trans" data-bn="অন্যান্য" data-km="ផ្សេងទៀត" data-my="အခြား" data-vi="Khác" data-tl="Iba pa" data-uz="Boshqa" data-id="Lainnya" data-mn="Бусад" data-ne="अन्य" data-si="වෙනත්" data-zh="其他" data-ky="Башка" data-ru="Другой" data-th="อื่นๆ">Other</div>
+                    </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="text" class="text-input" id="nationalityOtherText" placeholder="기타 국적명 입력" data-en="Enter other nationality">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn1" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+        <!-- A2: Age -->
+        <div class="step" data-step="2">
+            <span class="step-number">A2</span>
+            <h2 data-ko="귀하의 연령대는 어떻게 되십니까?"
+                data-en="What is your age group?"
+                data-bn="আপনার বয়সের গোষ্ঠী কী?"
+                data-km="តើអ្នកមានអាយុប៉ុណ្ណា?"
+                data-my="သငသက်အရွယ်စုစည်းမှု ဘာလဲ?"
+                data-vi="Bạn thuộc nhóm tuổi nào?"
+                data-tl="Ano ang iyong age group?"
+                data-uz="Sizning yosh guruhinigiz qanday?"
+                data-id="Berapa kelompok usia Anda?"
+                data-mn="Таны хэдэн настай вэ?"
+                data-ne="तपाईंको उमेर समूह के हो?"
+                data-si="ඔබගේ වයස් කාණ්ඩය කුමක්ද?"
+                data-zh="您的年龄段是多少？"
+                data-ky="Сиздин жаш топторуңуз кандай?"
+                data-ru="Какая у вас возрастная группа?"
+                data-th="คุณอยู่ในกลุ่มอายุใด?"
+                >귀하의 연령대는 어떻게 되십니까?</h2>
+            <p class="question-trans" id="qtrans-A2"></p>
+            <div class="age-grid">
+                <div class="age-card" data-action="select-single" data-category="age" data-value="1">
+                    <div class="age-num">10대</div>
+                    <div class="age-text">Teens<br></div>
+                    <div class="age-trans" data-bn="কিশোর" data-km="វ័យក្មេង" data-my="ကျောင်းသား" data-vi="Thanh thiếu niên" data-tl="Mga tin-edyer" data-uz="O'smirlar" data-id="Remaja" data-mn="Өсвөр нас" data-ne="किशोर" data-si="තරුණ" data-zh="青少年" data-ky="Өспүрүм" data-ru="Подростки" data-th="วัยรุ่น">Teens</div>
+                </div>
+                <div class="age-card" data-action="select-single" data-category="age" data-value="2">
+                    <div class="age-num">20대</div>
+                    <div class="age-text">20s<br></div>
+                    <div class="age-trans" data-bn="২০ এর দশক" data-km="វ័យ ២០" data-my="၂၀ များ" data-vi="20 tuổi" data-tl="20s" data-uz="20 yosh" data-id="20-an" data-mn="20-иод" data-ne="२० को दशक" data-si="20s" data-zh="20多岁" data-ky="20-жаш" data-ru="20-е" data-th="วัย 20">20s</div>
+                </div>
+                <div class="age-card" data-action="select-single" data-category="age" data-value="3">
+                    <div class="age-num">30대</div>
+                    <div class="age-text">30s<br></div>
+                    <div class="age-trans" data-bn="৩০ এর দশক" data-km="វ័យ ៣០" data-my="၃၀ များ" data-vi="30 tuổi" data-tl="30s" data-uz="30 yosh" data-id="30-an" data-mn="30-иод" data-ne="३० को दशक" data-si="30s" data-zh="30多岁" data-ky="30-жаш" data-ru="30-е" data-th="วัย 30">30s</div>
+                </div>
+                <div class="age-card" data-action="select-single" data-category="age" data-value="4">
+                    <div class="age-num">40대</div>
+                    <div class="age-text">40s<br></div>
+                    <div class="age-trans" data-bn="৪০ এর দশক" data-km="វ័យ ៤០" data-my="၄၀ များ" data-vi="40 tuổi" data-tl="40s" data-uz="40 yosh" data-id="40-an" data-mn="40-иод" data-ne="४० को दशक" data-si="40s" data-zh="40多岁" data-ky="40-жаш" data-ru="40-е" data-th="วัย 40">40s</div>
+                </div>
+                <div class="age-card" data-action="select-single" data-category="age" data-value="5">
+                    <div class="age-num">50대</div>
+                    <div class="age-text">50s<br></div>
+                    <div class="age-trans" data-bn="৫০ এর দশক" data-km="វ័យ ៥០" data-my="၅၀ များ" data-vi="50 tuổi" data-tl="50s" data-uz="50 yosh" data-id="50-an" data-mn="50-иод" data-ne="५० को दशक" data-si="50s" data-zh="50多岁" data-ky="50-жаш" data-ru="50-е" data-th="วัย 50">50s</div>
+                </div>
+                <div class="age-card" data-action="select-single" data-category="age" data-value="6">
+                    <div class="age-num">60대+</div>
+                    <div class="age-text">60s+<br></div>
+                    <div class="age-trans" data-bn="৬০+" data-km="៦០+" data-my="၆၀+" data-vi="60+" data-tl="60s+" data-uz="60+" data-id="60+" data-mn="60+" data-ne="६०+" data-si="60+" data-zh="60岁以上" data-ky="60+" data-ru="60+" data-th="60 ขึ้นไป">60s+</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn2" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+
+        <!-- A3: Gender -->
+        <div class="step" data-step="3">
+            <span class="step-number">A3</span>
+            <h2 data-ko="성별을 선택해 주세요"
+                data-en="Please select your gender"
+                data-bn="আপনার লিঙ্গ নির্বাচন করুন"
+                data-km="សូមជ្រើសរើសភេទរបស់អ្នក"
+                data-my="သင့်လိင် ရွေးချယ်ပါ"
+                data-vi="Vui lòng chọn giới tính của bạn"
+                data-tl="Mangyaring piliin ang iyong kasarian"
+                data-uz="Iltimos, jinsingizni tanlang"
+                data-id="Silakan pilih jenis kelamin Anda"
+                data-mn="Хүйсээ сонгоно уу"
+                data-ne="कृपया आफ्नो लिङ्ग छान्नुहोस्"
+                data-si="කරුණාකර ඔබේ ලිංගිකත්වය තෝරන්න"
+                data-zh="请选择您的性别"
+                data-ky="Сураныч, жынысыңызды тандаңыз"
+                data-ru="Пожалуйста, выберите ваш пол"
+                data-th="กรุณาเลือกเพศของคุณ"
+                >성별을 선택해 주세요</h2>
+            <p class="question-trans" id="qtrans-A3"></p>
+            <div class="gender-cards">
+                <div class="gender-card" data-action="select-single" data-category="gender" data-value="1">
+                    <div class="gender-icon">👨</div>
+                    <div class="gender-text">남성</div>
+                    <div class="gender-eng">Male</div>
+                    <div class="gender-trans" data-bn="পুরুষ" data-km="ប្រុស" data-my="ကျား" data-vi="Nam" data-tl="Lalaki" data-uz="Erkak" data-id="Pria" data-mn="Эрэгтэй" data-ne="पुरुष" data-si="පුරුෂ" data-zh="男性" data-ky="Эркек" data-ru="Мужской" data-th="ชาย">Male</div>
+                </div>
+                <div class="gender-card" data-action="select-single" data-category="gender" data-value="2">
+                    <div class="gender-icon">👩</div>
+                    <div class="gender-text">여성</div>
+                    <div class="gender-eng">Female</div>
+                    <div class="gender-trans" data-bn="মহিলা" data-km="ស្រី" data-my="မ" data-vi="Nữ" data-tl="Babae" data-uz="Ayol" data-id="Wanita" data-mn="Эмэгтэй" data-ne="महिला" data-si="ස්ත්‍රී" data-zh="女性" data-ky="Аял" data-ru="Женский" data-th="หญิง">Female</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn3" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+
+        <!-- A4: Residence -->
+        <div class="step" data-step="4">
+            <span class="step-number">A4</span>
+            <h2 data-ko="한국에 거주한 기간은 얼마나 되십니까?"
+                data-en="How long have you lived in Korea?"
+                data-bn="আপনি কতদিন ধরে কোরিয়ায় বাস করছেন?"
+                data-km="តើអ្នករស់នៅកូរ៉េបានយូរប៉ុណ្ណា?"
+                data-my="ကိုရီးယားတွင် ဘယ်လောက် ကြာ နေထိုင်ခဲ့ပါသလဲ?"
+                data-vi="Bạn đã sống ở Hàn Quốc bao lâu?"
+                data-tl="Gaano katagal ka nang nakatira sa Korea?"
+                data-uz="Koreyada qancha vaqt yashaysiz?"
+                data-id="Sudah berapa lama Anda tinggal di Korea?"
+                data-mn="Солонгост хэдэн жил амьдарч байна вэ?"
+                data-ne="तपाईं कोरियामा कति समयदेखि बसोबास गर्दै हुनुहुन्छ?"
+                data-si="ඔබ කොරියාවේ කොපමණ කාලයක් ජීවත් වෙනවාද?"
+                data-zh="您在韩国居住多久了？"
+                data-ky="Кореяда канча убакыт жашайсыз?"
+                data-ru="Как долго вы живете в Корее?"
+                data-th="คุณอาศัยอยู่ในเกาหลีมานานแค่ไหนแล้ว?"
+                >한국에 거주한 기간은 얼마나 되십니까?</h2>
+            <p class="question-trans" id="qtrans-A4"></p>
+            <div class="option-card" data-action="select-option" data-category="residence" data-value="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">1년 미만</div>
+                    <div class="option-eng">Less than 1 year</div>
+                    <div class="option-trans" data-bn="১ বছরের কম" data-km="១ ឆ្នាំក្រោម" data-my="၁ နှစ်အောက်" data-vi="Dưới 1 năm" data-tl="Wala pang 1 taon" data-uz="1 yildan kam" data-id="Kurang dari 1 tahun" data-mn="1 жилээс бага" data-ne="१ वर्ष भन्दा कम" data-si="වසර 1කට වඩා අඩු" data-zh="不到1年" data-ky="1 жылдан аз" data-ru="Менее 1 года" data-th="น้อยกว่า 1 ปี">Less than 1 year</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="residence" data-value="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">1년 ~ 3년 미만</div>
+                    <div class="option-eng">1-3 years</div>
+                    <div class="option-trans" data-bn="১-৩ বছর" data-km="១-៣ ឆ្នាំ" data-my="၁-၃ နှစ်" data-vi="1-3 năm" data-tl="1-3 taon" data-uz="1-3 yil" data-id="1-3 tahun" data-mn="1-3 жил" data-ne="१-३ वर्ष" data-si="වසර 1-3" data-zh="1-3年" data-ky="1-3 жыл" data-ru="1-3 года" data-th="1-3 ปี">1-3 years</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="residence" data-value="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">3년 ~ 5년 미만</div>
+                    <div class="option-eng">3-5 years</div>
+                    <div class="option-trans" data-bn="৩-৫ বছর" data-km="៣-៥ ឆ្នាំ" data-my="၃-၅ နှစ်" data-vi="3-5 năm" data-tl="3-5 taon" data-uz="3-5 yil" data-id="3-5 tahun" data-mn="3-5 жил" data-ne="३-५ वर्ष" data-si="වසර 3-5" data-zh="3-5年" data-ky="3-5 жыл" data-ru="3-5 лет" data-th="3-5 ปี">3-5 years</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="residence" data-value="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">5년 이상</div>
+                    <div class="option-eng">5 years or more</div>
+                    <div class="option-trans" data-bn="৫ বছরের বেশি" data-km="៥ ឆ្នាំឡើង" data-my="၅ နှစ် အထက်" data-vi="5 năm trở lên" data-tl="5 taon o higit pa" data-uz="5 yil va undan ko'p" data-id="5 tahun atau lebih" data-mn="5 жил ба түүнээс дээш" data-ne="५ वर्ष वा सोभन्दा बढी" data-si="වසර 5කට වඩා වැඩි" data-zh="5年以上" data-ky="5 жыл жана андан көп" data-ru="5 лет и более" data-th="5 ปีขึ้นไป">5 years or more</div>
+                    </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn4" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+
+        <!-- A5: Korean Level -->
+        <div class="step" data-step="5">
+            <span class="step-number">A5</span>
+            <h2 data-ko="한국어 의사소통 수준은 어느 정도이십니까?"
+                data-en="What is your Korean communication level?"
+                data-bn="আপনার কোরিয়ান যোগাযোগের স্তর কী?"
+                data-km="តើកម្រិតទំនាក់ទំនងកូរ៉េរបស់អ្នកជាអ្វី?"
+                data-my="သင့်ကိုးရီးယား ဆက်သွယ်မှု အဆင့် ဘာလဲ?"
+                data-vi="Trình độ giao tiếp tiếng Hàn của bạn như thế nào?"
+                data-tl="Ano ang iyong antas ng komunikasyon sa Korean?"
+                data-uz="Koreys tilida muloqot darajangiz qanday?"
+                data-id="Berapa tingkat komunikasi bahasa Korea Anda?"
+                data-mn="Солонгос хэлний харилцааны түвшин хэд вэ?"
+                data-ne="तपाईंको कोरियन सञ्चार स्तर कस्तो छ?"
+                data-si="ඔබගේ කොරියානු සන්නිවේදන මට්ටම කුමක්ද?"
+                data-zh="您的韩语沟通能力如何？"
+                data-ky="Сиздин корей тилиндеги байланыш деңгээлиңиз кандай?"
+                data-ru="Какой у вас уровень корейского языка?"
+                data-th="ระดับการสื่อสารภาษาเกาหลีของคุณเป็นอย่างไร?"
+                >한국어 의사소통 수준은 어느 정도이십니까?</h2>
+            <p class="question-trans" id="qtrans-A5"></p>
+            <div class="option-card" data-action="select-option" data-category="korean_level" data-value="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🔰 전혀 못함</div>
+                    <div class="option-eng">Cannot communicate at all</div>
+                    <div class="option-trans" data-bn="সম্পূর্ণ যোগাযোগ করতে পারি না" data-km="មិនអាចទំនាក់ទំនងបានទាំងស្រុង" data-my="လုံးဝ ဆက်သွယ် မရ" data-vi="Hoàn toàn không thể giao tiếp" data-tl="Hindi makapag-usap ng lahat" data-uz="Umuman muloqot qila olmayman" data-id="Tidak bisa berkomunikasi sama sekali" data-mn="Ямар ч харилцаа хийж чадахгүй" data-ne="बिलकुल संवाद गर्न सकिँदैन" data-si="සම්පූර්ණයෙන්ම සන්නිවේදනය කළ නොහැක" data-zh="完全无法沟通" data-ky="Толугу менен байланыша албайм" data-ru="Совсем не могу общаться" data-th="ไม่สามารถสื่อสารได้เลย">Cannot communicate at all</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="korean_level" data-value="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">📝 간단한 의사소통 가능</div>
+                    <div class="option-eng">Basic communication</div>
+                    <div class="option-trans" data-bn="সহজ যোগাযোগ সম্ভব" data-km="ទំនាក់ទំនងសាមញ្ញបាន" data-my="ရိုးရိုးသားသား ဆက်သွယ် နိုင်" data-vi="Có thể giao tiếp đơn giản" data-tl="Makapag-usap ng simpleng bagay" data-uz="Oddiy muloqot mumkin" data-id="Komunikasi sederhana mungkin" data-mn="Энгийн харилцаа боломжтой" data-ne="साधारण संवाहन सम्भव" data-si="සරල සන්නිවේදනය කළ හැක" data-zh="可以进行简单交流" data-ky="Жөнөкөй байланыш мүмкүн" data-ru="Могу просто общаться" data-th="สื่อสารอย่างง่ายได้">Basic communication</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="korean_level" data-value="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">💬 일상 대화 가능</div>
+                    <div class="option-eng">Daily conversation</div>
+                    <div class="option-trans" data-bn="দৈনন্দিন কথোপকথন সম্ভব" data-km="ទំនាក់ទំនងប្រចាំថ្ងៃបាន" data-my="နေ့စဉ် စကားပြော နိုင်" data-vi="Có thể nói chuyện hàng ngày" data-tl="Makapag-usap sa araw-araw" data-uz="Kundalik suhbat mumkin" data-id="Percakapan sehari-hari mungkin" data-mn="Өдөр тутмын яриа боломжтой" data-ne="दैनिक कुराकानी सम्भव" data-si="දිනපතා සංවාදය කළ හැක" data-zh="可以进行日常对话" data-ky="Күнүмдүк сүйлөшүү мүмкүн" data-ru="Могу вести повседневный разговор" data-th="สนทนาในชีวิตประจำวันได้">Daily conversation</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="korean_level" data-value="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🗣️ 능숙하게 소통 가능</div>
+                    <div class="option-eng">Fluent</div>
+                    <div class="option-trans" data-bn="দক্ষভাবে যোগাযোগ করতে পারি" data-km="ទំនាក់ទំនងបានយ៉ាងចេះ" data-my="လက်လှမ်းမှီ စွာ ဆက်သွယ် နိုင်" data-vi="Giao tiếp thành thạo" data-tl="Mahusay na makapag-usap" data-uz="Mukammal muloqot" data-id="Komunikasi lancar" data-mn="Чөлөөтэй харилцах боломжтой" data-ne="दक्षतापूर्वक संवाद गर्न सकिन्छ" data-si="ප්‍රවීණ ලෙස සන්නිවේදනය කළ හැක" data-zh="可以流利沟通" data-ky="Эркин байланышуу мүмкүн" data-ru="Свободно общаюсь" data-th="สื่อสารได้คล่อง">Fluent</div>
+                    </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn5" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+        <!-- B1: Medical Department -->
+        <div class="step" data-step="6">
+            <span class="step-number">B1</span>
+            <h2 data-ko="무료진료가 열린다면, 가장 필요한 진료과목은?"
+                data-en="Which medical department do you need the most?"
+                data-bn="বিনামূল্যে ক্লিনিক খুললে, আপনার সবচেয়ে প্রয়োজনীয় চিকিৎসা বিভাগ কোনটি?"
+                data-km="ប្រសិនបើមានគ្លីនិកឥតគិតថ្លៃ តើផ្នែកព្យាបាលណាដែលអ្នកត្រូវការបំផុត?"
+                data-my="အခမဲ့ ဆေးခန်း ဖွင့်လျှင်၊ သင့်အတွက် အလိုအပ်ဆုံး ဆေးဝါး ဌာနက ဘာလဲ?"
+                data-vi="Nếu có phòng khám miễn phí, khoa y tế nào bạn cần nhất?"
+                data-tl="Kung magbubukas ng libreng klinika, aling departamento ng medisina ang kailangan mo?"
+                data-uz="Agar bepul klinika ochilsa, sizga eng kerakli tibbiyot bo'limi qaysi?"
+                data-id="Jika klinik gratis dibuka, departemen medis apa yang paling Anda butuhkan?"
+                data-mn="Үнэгүй эмнэлэг нэвтэрвэл, танд хамгийн хэрэгтэй эмчилгээний төрөл юу вэ?"
+                data-ne="यदि निःशुल्क क्लिनिक खुल्छ भने, तपाईंलाई सबैभन्दा आवश्यक चिकित्सा विभाग कुन हो?"
+                data-si="නොමිලේ සායනයක් විවෘත වුවහොත්, ඔබට අවශ්‍යම වෛද්‍ය අංශය කුමක්ද?"
+                data-zh="如果开设免费诊所，您最需要哪个医疗科室？"
+                data-ky="Эгер акысыз клиника ачылса, сизге эң керек тibbий бөлүм кайсы?"
+                data-ru="Если откроется бесплатная клиника, какое медицинское отделение вам нужно больше всего?"
+                data-th="หากเปิดคลินิกฟรี คุณต้องการแผนกการแพทย์ใดมากที่สุด?"
+                >무료진료가 열린다면, 가장 필요한 진료과목은?</h2>
+            <p class="question-trans" id="qtrans-B1"></p>
+            <div class="multi-select-hint">✓ <span data-ko="최대 2개 선택 가능합니다" data-en="Select up to 2">최대 2개 선택 가능합니다</span></div>
+
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🩺 내과 (감기, 복통 등)</div>
+                    <div class="option-eng">Internal Medicine (Cold, stomachache)</div>
+                    <div class="option-trans" data-bn="অন্তর্বিভাগ (সর্দি, পেট ব্যথা)" data-km="ផ្នែកខាងក្នុង (ផ្តាសាយ, ឈឺពោះ)" data-my="အတွင်းရောဂါ (ချင်း၊ ဗိုက်နာ)" data-vi="Khoa Nội (cảm, đau bụng)" data-tl="Internal Medicine (sipon, sakit ng tiyan)" data-uz="Ichki kasalliklar (tumov, qorin og'rig'i)" data-id="Penyakit Dalam (pilek, sakit perut)" data-mn="Дотор (ханиад, хэвлий өвдөх)" data-ne="आन्तरिक चिकित्सा (रुघा, पेट दुखाइ)" data-si="අභ්‍යන්තර වෛද්‍ය (සෙම්ප්‍රතිශ්‍යාව, බඩ රිදීම)" data-zh="内科（感冒、腹痛）" data-ky="Ички оорулар (тамак, курсагы ооруу)" data-ru="Терапия (простуда, боль в животе)" data-th="อายุรกรรม (หวัด ปวดท้อง)">Internal Medicine</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🦷 치과 (충치, 스케일링 등)</div>
+                    <div class="option-eng">Dentistry (Cavity, scaling)</div>
+                    <div class="option-trans" data-bn="দন্তচিকিৎসা (ক্ষয়, স্কেলিং)" data-km="ធ្មេញ (រូចធ្មេញ, ស្កលីង)" data-my="သွား (သွားပေါင်း၊ scaling)" data-vi="Nha khoa (sâu răng, cạo vôi)" data-tl="Dentista (cavities, scaling)" data-uz="Tish shifokorligi (choyish, scaling)" data-id="Kedokteran Gigi (karies, scaling)" data-mn="Шүд (цоорох, scaling)" data-ne="दन्त चिकित्सा (किड्नी, स्केलिङ)" data-si="දන්ත වෛද්‍ය (කුහර, ස්කේලිං)" data-zh="牙科（蛀牙、洗牙）" data-ky="Тиш дарыгерлиги (чириген тиш, скейлинг)" data-ru="Стоматология (кариес, чистка)" data-th="ทันตกรรม (ฟันผุ ขูดหินปูน)">Dentistry</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🦴 정형외과 (뼈, 관절 통증)</div>
+                    <div class="option-eng">Orthopedics (Bone, joint pain)</div>
+                    <div class="option-trans" data-bn="অর্থোপেডিক (হাড়, জোড়া ব্যথা)" data-km="ឆ្អឹង (ឆ្អឹង, ឈឺសន្លាក់)" data-my="အရိုး (အရိုး၊ အဆစ်နာ)" data-vi="Chỉnh hình (xương, đau khớp)" data-tl="Orthopedics (buto, sakit ng kasukasuan)" data-uz="Ortopediya (suyak, bo'g'im og'rig'i)" data-id="Orthopedi (tulang, nyeri sendi)" data-mn="Ясны мэс засал (яс, үе өвдөх)" data-ne="अर्थोपेडिक (हड्डी, जोर्नी दुखाइ)" data-si="අස්ථි වෛද්‍ය (ඇට, සන්ධි වේදනාව)" data-zh="骨科（骨骼、关节疼痛）" data-ky="Ортопедия (сөөк, муун ооруу)" data-ru="Ортопедия (кости, суставы)" data-th="ศัลยกรรมกระดูก (กระดูก ปวดข้อ)">Orthopedics</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">👁️ 안과 (눈 검사)</div>
+                    <div class="option-eng">Ophthalmology (Eye check-up)</div>
+                    <div class="option-trans" data-bn="চোখ (চোখ পরীক্ষা)" data-km="ភ្នែក (ពិនិត្យភ្នែក)" data-my="မျက်လုံး (မျက်လုံးစစ်ဆေး)" data-vi="Mắt (khám mắt)" data-tl="Mata (pagsusuri ng mata)" data-uz="Ko'z (ko'z tekshiruvi)" data-id="Mata (pemeriksaan mata)" data-mn="Нүд (нүд шалгах)" data-ne="आँखा (आँखा जाँच)" data-si="නෙත (නෙත් පරීක්ෂාව)" data-zh="眼科（眼科检查）" data-ky="Көз (көз текшерүү)" data-ru="Офтальмология (проверка зрения)" data-th="จักษุแพทย์ (ตรวจตา)">Ophthalmology</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="5">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🧴 피부과 (피부 질환)</div>
+                    <div class="option-eng">Dermatology (Skin conditions)</div>
+                    <div class="option-trans" data-bn="ত্বক (ত্বকের সমস্যা)" data-km="ស្បែក (បញ្ហាស្បែក)" data-my="အသား (အသားရောဂါ)" data-vi="Da (bệnh da)" data-tl="Balat (kondisyon ng balat)" data-uz="Teri (teri muammolari)" data-id="Kulit (kondisi kulit)" data-mn="Арьс (арьсны өвчин)" data-ne="छाला (छाला रोग)" data-si="සම (සම් තත්ත්ව)" data-zh="皮肤科（皮肤病）" data-ky="Тери (тери көйгөйлөрү)" data-ru="Дерматология (кожные заболевания)" data-th="ผิวหนัง (โรคผิวหนัง)">Dermatology</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="medical" data-value="6">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🌿 한의과 (침, 뜸 치료)</div>
+                    <div class="option-eng">Korean Medicine (Acupuncture)</div>
+                    <div class="option-trans" data-bn="কোরিয়ান ওষুধ (অ্যাকুপাংচার)" data-km="ឱសថកូរ៉េ (ចាក់ម្ជុល)" data-my="ကိုးရီးယား ဆေးဝါး (ချိတ်)" data-vi="Y học Hàn Quốc (châm cứu)" data-tl="Korean Medicine (akupunktura)" data-uz="Koreys tibbiyoti (igna tiqish)" data-id="Pengobatan Korea (akupunktur)" data-mn="Солонгос эм (зүү тавих)" data-ne="कोरियन चिकित्सा (एक्यूपंक्चर)" data-si="කොරියානු වෛද්‍ය (ඇකupunක්චර්)" data-zh="韩医（针灸）" data-ky="Корей медицинасы (игне тээтүү)" data-ru="Корейская медицина (иглоукалывание)" data-th="ฮันวิทยา (ฝังเข็ม)">Korean Medicine</div>
+                    </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="text" class="text-input" id="medicalOther" placeholder="기타 진료과목" data-en="Other department">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn6" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+
+        <!-- C1: Cultural Experience -->
+        <div class="step" data-step="7">
+            <span class="step-number">C1</span>
+            <h2 data-ko="문화체험을 간다면, 가장 가고 싶은 장소는?"
+                data-en="Where do you want to go for a cultural experience?"
+                data-bn="সাংস্কৃতিক অভিজ্ঞতার জন্য, আপনি কোথায় যেতে চান?"
+                data-km="បើទៅបទពិសោធន៍វប្បធម៌ តើអ្នកចង់ទៅកន្លែងណា?"
+                data-my="ယဉ်ကျေးမှု အတွေ့အကြုံ ရှိရန်၊ သင်ဘယ်နေရာ သွားချင်ပါသလဲ?"
+                data-vi="Nếu đi trải nghiệm văn hóa, bạn muốn đi đâu nhất?"
+                data-tl="Kung magkakaroon ng karanasang kultural, saan mo gusto pumunta?"
+                data-uz="Madaniy tajriba uchun qayerga bormoqchisiz?"
+                data-id="Jika pergi pengalaman budaya, ke mana Anda ingin pergi?"
+                data-mn="Соёлын туршлагаар явах бол хаашаа очихыг хүсэж байна вэ?"
+                data-ne="सांस्कृतिक अनुभवको लागि, तपाईं कहाँ जान चाहनुहुन्छ?"
+                data-si="සංස්කෘතික අත්දැකීමක් සඳහා, ඔබ කොහේදී යාමට කැමති?"
+                data-zh="如果去文化体验，您最想去哪里？"
+                data-ky="Маданий тажрыйба үчүн, кайсы жакка баргыңыз келет?"
+                data-ru="Если пойти на культурный опыт, куда бы вы хотели пойти?"
+                data-th="หากไปสัมผัสวัฒนธรรม คุณอยากไปที่ไหนมากที่สุด?"
+                >문화체험을 간다면, 가장 가고 싶은 장소는?</h2>
+            <p class="question-trans" id="qtrans-C1"></p>
+            <div class="option-card" data-action="select-option" data-category="culture" data-value="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🏛️ 역사/전통 명소 (고궁, 한옥마을)</div>
+                    <div class="option-eng">Historical sites (Palaces, Hanok village)</div>
+                    <div class="option-trans" data-bn="ঐতিহাসিক স্থান (প্রাসাদ, হানোক গ্রাম)" data-km="ទីកន្លែងប្រវត្តិសាស្ត្រ (ព្រះបរមរាជវាំង, ភូមិ Hanok)" data-my="သမိုင်းဝင် နေရာ (နန်းတော်၊ Hanok ရွာ)" data-vi="Di tích lịch sử (Cung điện, làng Hanok)" data-tl="Makasaysayang lugar (Palasyo, Hanok village)" data-uz="Tarixiy joylar (Saroy, Hanok qishlog'i)" data-id="Situs bersejarah (Istana, desa Hanok)" data-mn="Түүхэн дурсгал (ордон, Ханок тосгон)" data-ne="ऐतिहासिक स्थल (दरबार, हानोक गाउँ)" data-si="ඓතිහාසික ස්ථාන (මාලිගා, හනොක් ගම)" data-zh="历史名胜（宫殿、韩屋村）" data-ky="Тарыхый жерлер (сарай, Ханок айылы)" data-ru="Исторические места (дворцы, деревня Ханок)" data-th="สถานที่ประวัติศาสตร์ (พระราชวัง หมู่บ้านฮันอก)">Historical sites</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="culture" data-value="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🎢 놀이공원 및 테마파크</div>
+                    <div class="option-eng">Amusement parks</div>
+                    <div class="option-trans" data-bn="বিনোদন পার্ক" data-km="សួនកម្សាន្ត" data-my="ဥယျာဉ်" data-vi="Công viên giải trí" data-tl="Amusement park" data-uz="Ko'ngilochar bog'lar" data-id="Taman hiburan" data-mn="Хөгжилтэй хүрээлэн" data-ne="मनोरञ्जन पार्क" data-si="විනෝදාත්මක උද්‍යාන" data-zh="游乐园" data-ky="Көңүл ачуучу бактар" data-ru="Парк развлечений" data-th="สวนสนุก">Amusement parks</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="culture" data-value="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🌳 자연 휴양림/수목원</div>
+                    <div class="option-eng">Nature parks (Forests, botanical gardens)</div>
+                    <div class="option-trans" data-bn="প্রাকৃতিক উদ্যান (বন, উদ্ভিদ উদ্যান)" data-km="សួនធម្មជាតិ (ព្រៃ, សួនរុក្ខវិទ្យា)" data-my="သဘာဝ ဥယျာဉ် (တော၊ အပင်ဥယျာဉ်)" data-vi="Công viên thiên nhiên (rừng, vườn thực vật)" data-tl="Nature park (gubat, botanical garden)" data-uz="Tabiiy bog'lar (o'rmon, botanika bog'i)" data-id="Taman alam (hutan, kebun botani)" data-mn="Байгалийн хүрээлэн (ой, ургамлын цэцэрлэг)" data-ne="प्राकृतिक उद्यान (जंगल, वनस्पति उद्यान)" data-si="ස්වභාවික උද්‍යාන (වනාන්තර, ශාක උද්‍යාන)" data-zh="自然公园（森林、植物园）" data-ky="Жаратылыш бактары (токой, ботаникалык бак)" data-ru="Природный парк (лес, ботанический сад)" data-th="สวนธรรมชาติ (ป่า สวนพฤกษศาสตร์)">Nature parks</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="culture" data-value="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🎨 박물관 및 미술관</div>
+                    <div class="option-eng">Museums and Art galleries</div>
+                    <div class="option-trans" data-bn="জাদুঘর এবং শিল্প প্রদর্শনী" data-km="សារមន្ទីរ និងវិចិត្រសាល" data-my="ပြတိုက် နှင့် အနုပညာ ပြခန်း" data-vi="Bảo tàng và Phòng trưng bày nghệ thuật" data-tl="Museo at Art gallery" data-uz="Muzey va San'at galereyasi" data-id="Museum dan Galeri seni" data-mn="Музей, Урлагийн галерей" data-ne="संग्रहालय र कला प्रदर्शनी" data-si="කෞතුකාගාර හා කලාගාර" data-zh="博物馆和美术馆" data-ky="Музей жана сүрөт галереясы" data-ru="Музеи и художественные галереи" data-th="พิพิธภัณฑ์และหอศิลป์">Museums</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="select-option" data-category="culture" data-value="5">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🎪 지역 축제 및 전통시장</div>
+                    <div class="option-eng">Local festivals and Traditional markets</div>
+                    <div class="option-trans" data-bn="স্থানীয় উৎসব এবং ঐতিহ্যবাহী বাজার" data-km="ពិធីបុណ្យតំបន់ និងផ្សារប្រពៃណី" data-my="ဒေသ ပွဲတော် နှင့် ရိုးရား စျေး" data-vi="Lễ hội địa phương và Chợ truyền thống" data-tl="Lokal na pista at Tradisyonal na palengke" data-uz="Mahalliy bayramlar va An'anaviy bozor" data-id="Festival lokal dan Pasar tradisional" data-mn="Орон нутгийн баяр, уламжлалт зах" data-ne="स्थानीय चाडपर्व र परम्परागत बजार" data-si="දේශීය උත්සව හා සාම්ප්‍රදායික වෙළඳපොළ" data-zh="地方节日和传统市场" data-ky="Жергиликтүү майрамдар жана салттуу базар" data-ru="Местные фестивали и традиционные рынки" data-th="เทศกาลท้องถิ่นและตลาดดั้งเดิม">Festivals</div>
+                    </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="text" class="text-input" id="cultureOther" placeholder="기타 장소" data-en="Other place">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn7" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+
+        <!-- C2: Hobby Classes -->
+        <div class="step" data-step="8">
+            <span class="step-number">C2</span>
+            <h2 data-ko="정기 취미 수업이 있다면, 배우고 싶은 것은?"
+                data-en="What hobby class do you want to take?"
+                data-bn="নিয়মিত শখ ক্লাস থাকলে, আপনি কী শিখতে চান?"
+                data-km="ប្រសិនបើមានថ្នាក់ការងារចិត្តជាប្រចាំ តើអ្នកចង់រៀនអ្វី?"
+                data-my="ပုံမှန် ဝါသနာ ပညာရေး ရှိလျှင်၊ သင် ဘာသင်ချင်ပါသလဲ?"
+                data-vi="Nếu có lớp sở thích định kỳ, bạn muốn học gì?"
+                data-tl="Kung may regular na klase ng libangan, ano ang gusto mong matutunan?"
+                data-uz="Doimiy qiziqish darslari bo'lsa, nima o'rganmoqchisiz?"
+                data-id="Jika ada kelas hobi reguler, apa yang ingin Anda pelajari?"
+                data-mn="Тогтмол хобби хичээл байвал, юу сурахыг хүсэж байна вэ?"
+                data-ne="नियमित शौक कक्षा छ भने, तपाईं के सिक्न चाहनुहुन्छ?"
+                data-si="නියමික හොබි පන්තියක් තිබේ නම්, ඔබ ඉගෙන ගැනීමට කැමති දේ කුමක්ද?"
+                data-zh="如果有定期兴趣课程，您想学什么？"
+                data-ky="Туруктуу хобби сабактары болсо, эмнени үйрөнгүңүз келет?"
+                data-ru="Если есть регулярные курсы по хобби, чему бы вы хотели научиться?"
+                data-th="หากมีชั้นเรียนงานอดิเรกประจำ คุณอยากเรียนอะไร?"
+                >정기 취미 수업이 있다면, 배우고 싶은 것은?</h2>
+            <p class="question-trans" id="qtrans-C2"></p>
+            <div class="multi-select-hint">✓ <span data-ko="최대 2개 선택 가능합니다" data-en="Select up to 2">최대 2개 선택 가능합니다</span></div>
+
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="1">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🍳 한국 요리 교실</div>
+                    <div class="option-eng">Korean cooking class</div>
+                    <div class="option-trans" data-bn="কোরিয়ান রান্নার ক্লাস" data-km="ថ្នាក់ធ្វើម្ហូបកូរ៉េ" data-my="ကိုးရီးယား ဟင်းချက်သင်တန်း" data-vi="Lớp nấu ăn Hàn Quốc" data-tl="Korean cooking class" data-uz="Koreys oshxonasi darsi" data-id="Kelas memasak Korea" data-mn="Солонгос хоолны анги" data-ne="कोरियन खाना पकाउने कक्षा" data-si="කොරියානු ඉවුම්පිහුම් පන්තිය" data-zh="韩国料理教室" data-ky="Корей тамак-аш сабагы" data-ru="Корейская кулинария" data-th="คลาสทำอาหารเกาหลี">Korean cooking</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="2">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🥋 실내 스포츠 (태권도, 요가 등)</div>
+                    <div class="option-eng">Indoor sports (Taekwondo, Yoga)</div>
+                    <div class="option-trans" data-bn="ইনডোর স্পোর্টস (তায়কোয়ান্দো, যোগ)" data-km="កីឡាក្នុងផ្ទះ (តៃក្វាន់ដូ, យូហ្គា)" data-my="အတွင်း အားကစား (တায়ကွမ်ဒို၊ ယောဂ)" data-vi="Thể thao trong nhà (Taekwondo, Yoga)" data-tl="Indoor sports (Taekwondo, Yoga)" data-uz="Xonaviy sport (Taekvondo, Yoga)" data-id="Olahraga dalam ruangan (Taekwondo, Yoga)" data-mn="Дотор спорт (Тхэквондо, Йога)" data-ne="इनडोर खेल (ताइक्वान्डो, योग)" data-si="ගෘහස්ථ ක්‍රීඩා (ටයික්වන්ඩෝ, යෝගා)" data-zh="室内运动（跆拳道、瑜伽）" data-ky="Ички спорт (Тхэквондо, Йога)" data-ru="Спорт в помещении (тхэквондо, йога)" data-th="กีฬาในร่ม (เทควันโด โยคะ)">Indoor sports</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="3">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🎤 K-Pop 댄스 및 보컬</div>
+                    <div class="option-eng">K-Pop dance and singing</div>
+                    <div class="option-trans" data-bn="কে-পপ নাচ এবং গান" data-km="K-Pop រាំ និងចំរៀង" data-my="K-Pop အက နှင့် သီချင်း" data-vi="K-Pop nhảy và hát" data-tl="K-Pop sayaw at kanta" data-uz="K-Pop raqs va kuylash" data-id="K-Pop dance dan nyanyian" data-mn="K-Pop бүжиг, дуу" data-ne="के-पप नृत्य र गायन" data-si="K-Pop නර්තනය සහ ගායනය" data-zh="K-Pop舞蹈和歌唱" data-ky="K-Pop бий жана ырдоо" data-ru="K-Pop танцы и пение" data-th="K-Pop เต้นและร้องเพลง">K-Pop</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="4">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">🎨 공예 및 미술 (비누, 그림 등)</div>
+                    <div class="option-eng">Arts and crafts (Soap making, drawing)</div>
+                    <div class="option-trans" data-bn="শিল্প ও কারুশিল্প (সাবান, ছবি আঁকা)" data-km="សិប្បកម្ម និងសិល្បៈ (សាប៊ូ, គូររូប)" data-my="အနုပညာ နှင့် လက်မှု (ဆပ်ပြာ၊ ပန်းချီ)" data-vi="Nghệ thuật và Thủ công (làm xà phòng, vẽ)" data-tl="Sining at sining (paggawa ng sabon, pagguhit)" data-uz="San'at va hunarmandchilik (sovun, rasm)" data-id="Seni dan kerajinan (membuat sabun, menggambar)" data-mn="Урлаг, гар урлал (хөөсөн саван, зураг)" data-ne="कला र शिल्प (साबुन, चित्रकला)" data-si="කලා හා ශිල්ප (සබන්, චිත්‍ර)" data-zh="工艺美术（肥皂、绘画）" data-ky="Сүрөт жана кол өнөрчүлүк (самын, сүрөт)" data-ru="Искусство и рукоделие (мыло, рисование)" data-th="ศิลปะและงานฝีมือ (สบู่ วาดรูป)">Arts & crafts</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="5">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">💻 컴퓨터 및 IT 기기 활용</div>
+                    <div class="option-eng">Computer & IT skills</div>
+                    <div class="option-trans" data-bn="কম্পিউটার এবং আইটি দক্ষতা" data-km="កុំព្យូទ័រ និងជំនាញអាយធី" data-my="ကွန်ပျူတာ နှင့် IT ကျွမ်းကျင်မှု" data-vi="Máy tính và Kỹ năng IT" data-tl="Computer at IT skills" data-uz="Kompyuter va IT ko'nikmalari" data-id="Komputer & keterampilan IT" data-mn="Компьютер, МТ чадвар" data-ne="कम्प्युटर र आईटी सीप" data-si="පරිගණක හා තොරතුරු තාක්ෂණ කුසලතා" data-zh="计算机和IT技能" data-ky="Компьютер жана IT жөндөмдүүлүктөрү" data-ru="Компьютер и IT навыки" data-th="คอมพิวเตอร์และทักษะ IT">IT skills</div>
+                    </div>
+            </div>
+            <div class="option-card" data-action="toggle-multi" data-category="hobby" data-value="6">
+                <div class="check-circle"></div>
+                <div>
+                    <div class="option-text">📷 사진 및 영상 촬영/편집</div>
+                    <div class="option-eng">Photography & Video editing</div>
+                    <div class="option-trans" data-bn="ফটোগ্রাফি এবং ভিডিও সম্পাদনা" data-km="ថតរូប និងការត្រួតពិនិត្យវីដេអូ" data-my="ဓာတ်ပုံ နှင့် ဗီဒီယို တည်းဖြတ်" data-vi="Nhiếp ảnh và Chỉnh sửa video" data-tl="Photography at Video editing" data-uz="Fotografiya va Video montaj" data-id="Fotografi & Pengeditan video" data-mn="Гэрэл зураг, Видео засвар" data-ne="फोटोग्राफी र भिडियो सम्पादन" data-si="ඡායාරූපකරණය හා වීඩියෝ සංස්කරණය" data-zh="摄影和视频编辑" data-ky="Сүрөт жана видео монтаж" data-ru="Фотография и видеомонтаж" data-th="การถ่ายภาพและตัดต่อวิดีโอ">Photography</div>
+                    </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <input type="text" class="text-input" id="hobbyOther" placeholder="기타 취미" data-en="Other hobby">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-next" data-action="next" id="btn8" data-ko="다음" data-en="Next">다음</button>
+            </div>
+        </div>
+        <!-- E1: Open Suggestions -->
+        <div class="step" data-step="9">
+            <span class="step-number">E1</span>
+            <h2 data-ko="마지막으로, 센터에 바라는 점이나 제안이 있으신가요?"
+                data-en="Any suggestions or programs you want?"
+                data-bn="অবশেষে, কেন্দ্রের জন্য আপনার কোনো পরামর্শ বা প্রস্তাব আছে কি?"
+                data-km="ចុងក្រោយ តើអ្នកមានយោបល់ឬការណែនាំសម្រាប់មជ្ឈមណ្ឌលទេ?"
+                data-my="နောက်ဆုံး၊ စင်တာအတွက် သင့်ရဲ့ အကြံပေးချက် သို့မဟုတ် အဆိုပြုချက်များ ရှိပါသလား?"
+                data-vi="Cuối cùng, bạn có điều gì mong muốn hoặc đề xuất cho trung tâm không?"
+                data-tl="Sa huli, mayroon ka bang anumang hiling o mungkahi para sa center?"
+                data-uz="Nihoyat, markaz uchun sizning biron bir taklif yoki fikringiz bormi?"
+                data-id="Terakhir, apakah Anda memiliki harapan atau saran untuk pusat?"
+                data-mn="Эцэст нь, төвийн талаар танд ямар нэгэн санал хүсэлт байна уу?"
+                data-ne="अन्तमा, केन्द्रको लागि तपाईंसँग कुनै सुझाव वा प्रस्ताव छ?"
+                data-si="අවසාන වශයෙන්, මධ්‍යස්ථානයට ඔබට යම් යෝජනාවක් හෝ ඉල්ලීමක් තිබේද?"
+                data-zh="最后，您对中心有什么期望或建议吗？"
+                data-ky="Акырында, борбор үчүн сиздин кандайдыр бир сунуштарыңыз же тилектериңиз барбы?"
+                data-ru="Наконец, есть ли у вас пожелания или предложения для центра?"
+                data-th="สุดท้ายนี้ คุณมีความคาดหวังหรือข้อเสนอแนะสำหรับศูนย์หรือไม่?"
+                >마지막으로, 센터에 바라는 점이나 제안이 있으신가요?</h2>
+            <p class="question-trans" id="qtrans-E1"></p>
+            <p class="subtitle" data-ko="프로그램, 진료, 센터 운영 등 어떤 의견이든 환영합니다!"
+               data-en="Any opinions on programs, clinics, or center operations are welcome!"
+               data-bn="প্রোগ্রাম, ক্লিনিক, বা কেন্দ্র পরিচালনা সম্পর্কে যেকোনো মতামত স্বাগত!"
+               data-km="មតិយោបល់ណាមួយអំពីកម្មវិធី គ្លីនិក ឬប្រតិបត្តិការមជ្ឈមណ្ឌល សូមស្វាគមន៍!"
+               data-my="အစီအစဉ်၊ ဆေးခန်း၊ သို့မဟုတ် စင်တာ လုပ်ငန်းများအပေါ် မည်သည့် အမြင်ဖြစ်ဖြစ် ကြိုဆိုပါသည်!"
+               data-vi="Mọi ý kiến về chương trình, phòng khám hoặc hoạt động của trung tâm đều được hoan nghênh!"
+               data-tl="Anumang opinyon tungkol sa mga programa, klinika, o operasyon ng center ay malugod na tinatanggap!"
+               data-uz="Dasturlar, klinikalar yoki markaz faoliyati haqidagi har qanday fikrlar xush kelibsiz!"
+               data-id="Setiap pendapat tentang program, klinik, atau operasi pusat sangat diterima!"
+               data-mn="Хөтөлбөр, эмнэлэг, эсвэл төвийн үйл ажиллагааны талаарх ямар ч санал хүсэлтийг тавтай морил!"
+               data-ne="कार्यक्रम, क्लिनिक, वा केन्द्र सञ्चालन सम्बन्धी कुनै पनि राय स्वागत योग्य छ!"
+               data-si="වැඩසටහන්, සායන, හෝ මධ්‍යස්ථාන කටයුතු පිළිබඳ ඕනෑම අදහසක් සාදරයෙන් පිළිගනිමු!"
+               data-zh="欢迎对项目、诊所或中心运营提出任何意见！"
+               data-ky="Программалар, клиникалар же борбордун ишмердүүлүгү боюнча каалаган пикир кубатталат!"
+               data-ru="Приветствуются любые мнения о программах, клиниках или работе центра!"
+               data-th="ยินดีต้อนรับความคิดเห็นใดๆ เกี่ยวกับโปรแกรม คลินิก หรือการดำเนินงานของศูนย์!"
+               >프로그램, 진료, 센터 운영 등 어떤 의견이든 환영합니다!</p>
+
+            <textarea class="textarea-input" id="suggestions" placeholder="자유롭게 작성해 주세요" data-en="Write freely"></textarea>
+            <p class="hint">💡 <span data-ko="꼭 작성하지 않아도 됩니다. 다음 버튼을 눌러 제출하셔도 좋아요."
+               data-en="You don't have to write. You can press Next to submit."
+               data-bn="আপনাকে অবশ্যই লিখতে হবে না। আপনি জমা দিতে পরবর্তী চাপতে পারেন।"
+               data-km="អ្នកមិនចាំបាច់សរសេរទេ។ អ្នកអាចចុចបន្ទាប់ដើម្បីដាក់ស្នើ។"
+               data-my="မရေးဖို့ မဖြစ်မနေလိုအပ်ပါ။ သင် Submit နှိပ်နိုင်ပါသည်။"
+               data-vi="Bạn không nhất thiết phải viết. Bạn có thể nhấn Tiếp theo để gửi."
+               data-tl="Hindi mo kailangang sumulat. Maaari mong pindutin ang Susunod para mag-submit."
+               data-uz="Yozish shart emas. Yuborish uchun Keyingi tugmasini bosishingiz mumkin."
+               data-id="Anda tidak harus menulis. Anda dapat menekan Berikutnya untuk mengirimkan."
+               data-mn="Бичих шаардлагагүй. Илгээхийн тулд Дараах товчийг дарж болно."
+               data-ne="लेख्नु अनिवार्य छैन। पेश गर्न अर्को थिच्न सकिन्छ।"
+               data-si="ලිවීම අනිවාර්ය නැත. ඉදිරියට යාමට ඔබට ඉදිරියට බොත්තම ඔබන්න පුළුවන්."
+               data-zh="您不必写。您可以按下一步提交。"
+               data-ky="Жазуу милдеттүү эмес. Жөнөтүү үчүн Кийинки баскычын басса болот."
+               data-ru="Писать не обязательно. Вы можете нажать Далее для отправки."
+               data-th="คุณไม่จำเป็นต้องเขียน คุณสามารถกดถัดไปเพื่อส่งได้"
+               >꼭 작성하지 않아도 됩니다. 다음 버튼을 눌러 제출하셔도 좋아요.</span></p>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-prev" data-action="prev" data-ko="이전" data-en="Previous">이전</button>
+                <button type="button" class="btn btn-submit" data-action="submit" data-ko="설문 제출하기" data-en="Submit Survey">설문 제출하기</button>
+            </div>
+        </div>
+
+        <!-- Completion -->
+        <div class="step completion-step" data-step="10">
+            <div class="completion-icon">🎉</div>
+            <h2 data-ko="설문이 완료되었습니다!"
+                data-en="Survey completed!"
+                data-bn="সমীক্ষা সম্পন্ন হয়েছে!"
+                data-km="ការស្ទង់មតិបានបញ្ចប់!"
+                data-my="စစ်တမ်း ပြီးပါပြီ!"
+                data-vi="Khảo sát đã hoàn thành!"
+                data-tl="Natapos na ang survey!"
+                data-uz="So'rov tugadi!"
+                data-id="Survei selesai!"
+                data-mn="Судалгаа дууслаа!"
+                data-ne="सर्वेक्षण सम्पन्न भयो!"
+                data-si="සමීක්ෂණය අවසන්!"
+                data-zh="调查完成！"
+                data-ky="Сурамжылоо аяктады!"
+                data-ru="Опрос завершен!"
+                data-th="การสำรวจเสร็จสิ้น!"
+                >설문이 완료되었습니다!</h2>
+            <p class="eng-subtitle">Thank you for your participation!</p>
+            <p data-ko="귀하의 소중한 의견이 더 나은 프로그램과 무료진료를 만드는 데 큰 도움이 됩니다.<br><br>감사합니다! 🙏"
+               data-en="Your valuable opinions will be a great help in creating better programs and free medical clinics.<br><br>Thank you! 🙏"
+               data-bn="আপনার মূল্যবান মতামত আরও ভালো প্রোগ্রাম এবং বিনামূল্যে মেডিকেল ক্লিনিক তৈরিতে বড় সাহায্য হবে।<br><br>ধন্যবাদ! 🙏"
+               data-km="មតិដ៏មានតម្លៃរបស់អ្នកនឹងជាជំនួយដ៏ធំក្នុងការបង្កើតកម្មវិធីដ៏ល្អ និងគ្លីនិកវេជ្ជសាស្ត្រឥតគិតថ្លៃ។<br><br>សូមអរគុណ! 🙏"
+               data-my="သင့်ရဲ့ တန်ဖိုးထားသော အမြင်များက ပိုမိုကောင်းမွန်သော အစီအစဉ်များနှင့် အခမဲ့ ဆေးခန်းများဖန်တီးရန် ကြီးမားသော အကူအညီဖြစ်လိမ့်မည်။<br><br>ကျေးဇူးတင်ပါသည်! 🙏"
+               data-vi="Ý kiến quý báu của bạn sẽ là một sự giúp đỡ lớn trong việc tạo ra các chương trình tốt hơn và phòng khám y tế miễn phí.<br><br>Cảm ơn bạn! 🙏"
+               data-tl="Ang iyong mahahalagang opinyon ay malaking tulong sa paglikha ng mas magandang programa at libreng klinika.<br><br>Salamat! 🙏"
+               data-uz="Sizning qimmatli fikrlaringiz yaxshiroq dasturlar va bepul klinikalarni yaratishda katta yordam bo'ladi.<br><br>Rahmat! 🙏"
+               data-id="Pendapat berharga Anda akan sangat membantu dalam menciptakan program yang lebih baik dan klinik gratis.<br><br>Terima kasih! 🙏"
+               data-mn="Таны үнэтэй санал сайн хөтөлбөр, үнэгүй эмнэлгийг бий болгоход их тус болно.<br><br>Баярлалаа! 🙏"
+               data-ne="तपाईंको मूल्यवान राय राम्रो कार्यक्रम र निःशुल्क क्लिनिक सिर्जना गर्न ठूलो मद्दत हुनेछ।<br><br>धन्यवाद! 🙏"
+               data-si="ඔබගේ වටිනා අදහස් වඩා හොඳ වැඩසටහන් සහ නොමිලේ සායන සාදා ගැනීමට විශාල උදව්වක් වනු ඇත.<br><br>ස්තුතියි! 🙏"
+               data-zh="您的宝贵意见将对创建更好的项目和免费诊所大有帮助。<br><br>谢谢！🙏"
+               data-ky="Сиздин баалуу пикирлериниз жакшыраак программалар жана акысыз клиникаларды түзүүгө чоң жардам болот.<br><br>Рахмат! 🙏"
+               data-ru="Ваше ценное мнение будет большой помощью в создании лучших программ и бесплатных клиник.<br><br>Спасибо! 🙏"
+               data-th="ความคิดเห็นอันมีค่าของคุณจะเป็นความช่วยเหลืออย่างมากในการสร้างโครงการที่ดีขึ้นและคลินิกฟรี<br><br>ขอบคุณ! 🙏"
+               >귀하의 소중한 의견이 더 나은 프로그램과 무료진료를 만드는 데 큰 도움이 됩니다.<br><br>감사합니다! 🙏</p>
+        </div>
+    </div>
+
+    <script>
+        // 언어 매핑: 국적 코드 -> 언어 코드
+        const nationToLang = {
+            '1': 'bn',  // 방글라데시 -> 벵골어
+            '2': 'km',  // 캄보디아 -> 크메르어
+            '3': 'my',  // 미얀마 -> 버마어
+            '4': 'vi',  // 베트남 -> 베트남어
+            '5': 'tl',  // 필리핀 -> 타갈로그어
+            '6': 'uz',  // 우즈베키스탄 -> 우즈베크어
+            '7': 'id',  // 인도네시아 -> 인도네시아어
+            '8': 'mn',  // 몽골 -> 몽골어
+            '9': 'ne',  // 네팔 -> 네팔어
+            '10': 'si', // 스리랑카 -> 싱할라어
+            '11': 'zh', // 중국 -> 중국어
+            '12': 'ky', // 키르기스스탄 -> 키르기스어
+            '13': 'ru', // 러시아 -> 러시아어
+            '14': 'th', // 태국 -> 태국어
+            '99': 'en'  // 기타 -> 영어
+        };
+
+        let currentLang = 'ko';
+        let currentStep = 0;
+        const totalSteps = 10;
+        const answers = {};
+
+        function updateProgress() {
+            const progress = (currentStep / (totalSteps - 1)) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = currentStep + ' / ' + (totalSteps - 1);
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelector('.step[data-step="' + step + '"]').classList.add('active');
+            currentStep = step;
+            updateProgress();
+
+            // 언어 전환 시 현재 문항 번역 업데이트
+            if (currentLang !== 'ko') {
+                updateStepTranslation(step);
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps - 1) showStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            if (currentStep > 0) showStep(currentStep - 1);
+        }
+
+        // 국적 선택 시 언어 자동 전환
+        function selectNationality(element, value) {
+            selectOption(element, 'nationality', value);
+
+            // 언어 선택 바 표시
+            document.getElementById('langBar').style.display = 'flex';
+
+            // 선택한 국적에 맞는 언어로 자동 전환
+            const langCode = nationToLang[value];
+            if (langCode && langCode !== 'ko') {
+                setLang(langCode);
+            }
+        }
+
+        // 언어 전환 함수
+        function setLang(lang) {
+            currentLang = lang;
+
+            // 버튼 활성화 상태 업데이트
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + lang).classList.add('active');
+
+            // 모든 번역 요소 업데이트
+            updateAllTranslations();
+
+            // 현재 문항 번역 업데이트
+            updateStepTranslation(currentStep);
+        }
+
+        function updateAllTranslations() {
+            // 옵션 카드 번역
+            document.querySelectorAll('.option-trans').forEach(el => {
+                const trans = el.getAttribute('data-' + currentLang);
+                if (trans) {
+                    el.textContent = trans;
+                    el.classList.add('show');
+                } else {
+                    el.classList.remove('show');
+                }
+            });
+
+            // 연령대 번역
+            document.querySelectorAll('.age-trans').forEach(el => {
+                const trans = el.getAttribute('data-' + currentLang);
+                if (trans) {
+                    el.textContent = trans;
+                    el.classList.add('show');
+                } else {
+                    el.classList.remove('show');
+                }
+            });
+
+            // 성별 번역
+            document.querySelectorAll('.gender-trans').forEach(el => {
+                const trans = el.getAttribute('data-' + currentLang);
+                if (trans) {
+                    el.textContent = trans;
+                    el.classList.add('show');
+                } else {
+                    el.classList.remove('show');
+                }
+            });
+
+            // 리커트 척도 번역
+            document.querySelectorAll('.likert-trans').forEach(el => {
+                const trans = el.getAttribute('data-' + currentLang);
+                if (trans) {
+                    el.textContent = trans;
+                    el.classList.add('show');
+                } else {
+                    el.classList.remove('show');
+                }
+            });
+
+            // 버튼 텍스트 번역
+            document.querySelectorAll('.btn[data-' + currentLang + ']').forEach(btn => {
+                const trans = btn.getAttribute('data-' + currentLang);
+                if (trans) btn.textContent = trans;
+            });
+
+            // 힌트 텍스트 번역
+            document.querySelectorAll('.hint span[data-' + currentLang + ']').forEach(span => {
+                const trans = span.getAttribute('data-' + currentLang);
+                if (trans) span.textContent = trans;
+            });
+
+            // 멀티셀렉트 힌트 번역
+            document.querySelectorAll('.multi-select-hint span[data-' + currentLang + ']').forEach(span => {
+                const trans = span.getAttribute('data-' + currentLang);
+                if (trans) span.textContent = trans;
+            });
+
+            // 서브타이틀 번역
+            document.querySelectorAll('.subtitle[data-' + currentLang + ']').forEach(el => {
+                const trans = el.getAttribute('data-' + currentLang);
+                if (trans) el.textContent = trans;
+            });
+        }
+
+        function updateStepTranslation(step) {
+            const stepEl = document.querySelector('.step[data-step="' + step + '"]');
+            if (!stepEl) return;
+
+            // h2 질문 제목 번역
+            const h2 = stepEl.querySelector('h2');
+            if (h2) {
+                const trans = h2.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    // 원래 한국어는 그대로 두고, 번역 텍스트를 question-trans에 표시
+                    const qtrans = stepEl.querySelector('.question-trans');
+                    if (qtrans) {
+                        qtrans.textContent = trans;
+                        qtrans.classList.add('show');
+                    }
+                } else {
+                    const qtrans = stepEl.querySelector('.question-trans');
+                    if (qtrans) qtrans.classList.remove('show');
+                }
+            }
+
+            // 인트로 메시지 번역
+            const introMsg = stepEl.querySelector('.intro-message p');
+            if (introMsg) {
+                const trans = introMsg.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    introMsg.textContent = trans;
+                } else if (currentLang === 'ko') {
+                    const koText = introMsg.getAttribute('data-ko');
+                    if (koText) introMsg.textContent = koText;
+                }
+            }
+
+            // 인트로 제목 번역
+            const introH1 = stepEl.querySelector('h1');
+            if (introH1) {
+                const trans = introH1.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    introH1.innerHTML = trans;
+                } else if (currentLang === 'ko') {
+                    const koText = introH1.getAttribute('data-ko');
+                    if (koText) introH1.innerHTML = koText;
+                }
+            }
+
+            // 타임 배지 번역
+            const timeBadge = stepEl.querySelector('.time-badge span');
+            if (timeBadge) {
+                const trans = timeBadge.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    timeBadge.textContent = trans;
+                } else if (currentLang === 'ko') {
+                    const koText = timeBadge.getAttribute('data-ko');
+                    if (koText) timeBadge.textContent = koText;
+                }
+            }
+
+            // 완료 화면 번역
+            const completionP = stepEl.querySelector('p');
+            if (completionP && stepEl.classList.contains('completion-step')) {
+                const trans = completionP.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    completionP.innerHTML = trans;
+                } else if (currentLang === 'ko') {
+                    const koText = completionP.getAttribute('data-ko');
+                    if (koText) completionP.innerHTML = koText;
+                }
+            }
+
+            // 완료 화면 제목 번역
+            const completionH2 = stepEl.querySelector('h2');
+            if (completionH2 && stepEl.classList.contains('completion-step')) {
+                const trans = completionH2.getAttribute('data-' + currentLang);
+                if (trans && currentLang !== 'ko') {
+                    completionH2.textContent = trans;
+                } else if (currentLang === 'ko') {
+                    const koText = completionH2.getAttribute('data-ko');
+                    if (koText) completionH2.textContent = koText;
+                }
+            }
+        }
+
+        function selectOption(element, category, value) {
+            const container = element.closest('.step');
+            container.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            answers[category] = value;
+            const otherInput = container.querySelector('input[type="text"]');
+            if (otherInput) otherInput.value = '';
+        }
+
+        function selectSingle(element, category, value) {
+            const container = element.closest('.step');
+            container.querySelectorAll('.age-card, .gender-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            answers[category] = value;
+        }
+
+        function selectLikert(element, category, value) {
+            const container = element.closest('.likert-scale');
+            container.querySelectorAll('.likert-item').forEach(item => item.classList.remove('selected'));
+            element.classList.add('selected');
+            answers[category] = value;
+        }
+
+        function toggleMultiSelect(element, category, value) {
+            const container = element.closest('.step');
+            const selected = container.querySelectorAll('.option-card.selected');
+
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                if (answers[category]) answers[category] = answers[category].filter(v => v !== value);
+            } else {
+                if (selected.length >= 2) {
+                    const first = selected[0];
+                    first.classList.remove('selected');
+                    const firstVal = first.getAttribute('data-value');
+                    if (answers[category]) answers[category] = answers[category].filter(v => v !== firstVal);
+                }
+                element.classList.add('selected');
+                element.setAttribute('data-value', value);
+                if (!answers[category]) answers[category] = [];
+                answers[category].push(value);
+            }
+            const otherInput = container.querySelector('input[type="text"]');
+            if (otherInput) otherInput.value = '';
+        }
+
+        function clearSelection(category) {
+            const container = document.querySelector('.step.active');
+            container.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            delete answers[category];
+        }
+
+        function clearMultiSelection(category) {
+            const container = document.querySelector('.step.active');
+            container.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+            delete answers[category];
+        }
+
+        function submitSurvey() {
+            const textInputs = document.querySelectorAll('.text-input, .textarea-input');
+            textInputs.forEach(input => {
+                if (input.value.trim()) answers[input.id] = input.value.trim();
+            });
+
+            // Save to localStorage
+            answers.timestamp = new Date().toISOString();
+            let allResponses = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+            allResponses.push(answers);
+            localStorage.setItem('surveyResponses', JSON.stringify(allResponses));
+
+            console.log('Survey Answers:', answers);
+            showStep(10);
+            document.getElementById('progressText').textContent = '완료!';
+        }
+
+        
+        // Admin functions
+        const ADMIN_PASSWORD = 'hwaseong2025';
+
+        function showAdminLogin() {
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('adminPassword').focus();
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function checkAdminLogin() {
+            const input = document.getElementById('adminPassword').value;
+            if (input === ADMIN_PASSWORD) {
+                document.getElementById('adminModal').style.display = 'none';
+                showAdminDashboard();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // Allow Enter key to submit login
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.getElementById('adminModal').style.display === 'flex') {
+                checkAdminLogin();
+            }
+        });
+
+        function showAdminDashboard() {
+            document.getElementById('adminDashboard').style.display = 'block';
+            loadSurveyData();
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('adminDashboard').style.display = 'none';
+        }
+
+        let deleteTargetIndex = null;
+
+        function showDeleteModal(index) {
+            deleteTargetIndex = index;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            deleteTargetIndex = null;
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            if (deleteTargetIndex === null) return;
+            let allData = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+            allData.splice(deleteTargetIndex, 1);
+            localStorage.setItem('surveyResponses', JSON.stringify(allData));
+            closeDeleteModal();
+            loadSurveyData();
+        }
+
+        function deleteAllResponses() {
+            if (!confirm('정말 모든 응답을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+            localStorage.removeItem('surveyResponses');
+            loadSurveyData();
+        }
+
+        // Load and display survey data from localStorage
+        function loadSurveyData() {
+            const allData = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+
+            // Update stats
+            document.getElementById('totalResponses').textContent = allData.length;
+
+            const today = new Date().toDateString();
+            const todayCount = allData.filter(r => new Date(r.timestamp).toDateString() === today).length;
+            document.getElementById('todayResponses').textContent = todayCount;
+
+            // Nationality distribution
+            const natMap = {1:'방글라데시',2:'캄보디아',3:'미얀마',4:'베트남',5:'필리핀',6:'우즈베키스탄',7:'인도네시아',8:'몽골',9:'네팔',10:'스리랑카',11:'중국',12:'키르기스스탄',13:'러시아',14:'태국',99:'기타'};
+            const natCounts = {};
+            allData.forEach(r => {
+                const nat = natMap[r.nationality] || r.nationality;
+                natCounts[nat] = (natCounts[nat] || 0) + 1;
+            });
+            const topNats = Object.entries(natCounts).sort((a,b) => b[1]-a[1]).slice(0,3);
+            document.getElementById('topNationalities').innerHTML = topNats.map(([k,v]) => `${k}: ${v}명`).join('<br>');
+
+            // Table
+            const tbody = document.getElementById('responsesTableBody');
+            tbody.innerHTML = allData.map((r, i) => {
+                const ageMap = {1:'10대',2:'20대',3:'30대',4:'40대',5:'50대',6:'60대+'};
+                const genderMap = {1:'남',2:'여'};
+                const resMap = {1:'1년미만',2:'1-3년',3:'3-5년',4:'5년이상'};
+                const korMap = {1:'전혀못함',2:'간단히가능',3:'일상대화',4:'능숙'};
+                const medMap = {1:'내과',2:'치과',3:'정형외과',4:'안과',5:'피부과',6:'한의과'};
+                const cultMap = {1:'역사명소',2:'놀이공원',3:'자연휴양',4:'박물관',5:'축제시장'};
+                const hobbyMap = {1:'요리',2:'스포츠',3:'K-Pop',4:'공예',5:'IT',6:'사진'};
+
+                const medVal = Array.isArray(r.medical) ? r.medical.map(v => medMap[v] || v).join(', ') : (medMap[r.medical] || r.medical || '-');
+                const hobbyVal = Array.isArray(r.hobby) ? r.hobby.map(v => hobbyMap[v] || v).join(', ') : (hobbyMap[r.hobby] || r.hobby || '-');
+
+                return `<tr style="border-bottom:1px solid #f0f0f0;">
+                    <td style="padding:10px;">${i+1}</td>
+                    <td style="padding:10px;">${new Date(r.timestamp).toLocaleString('ko-KR')}</td>
+                    <td style="padding:10px;">${natMap[r.nationality] || r.nationality || '-'}</td>
+                    <td style="padding:10px;">${ageMap[r.age] || r.age || '-'}</td>
+                    <td style="padding:10px;">${genderMap[r.gender] || r.gender || '-'}</td>
+                    <td style="padding:10px;">${resMap[r.residence] || r.residence || '-'}</td>
+                    <td style="padding:10px;">${korMap[r.korean_level] || r.korean_level || '-'}</td>
+                    <td style="padding:10px;">${medVal}</td>
+                    <td style="padding:10px;">${cultMap[r.culture] || r.culture || '-'}</td>
+                    <td style="padding:10px;">${hobbyVal}</td>
+                    <td style="padding:10px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.suggestions || '-'}</td>
+                    <td style="padding:10px; text-align:center;">
+                        <button type="button" data-action="delete-response" data-index="${i}" onclick="showDeleteModal(${i}); return false;" style="background:#e74c3c; color:white; border:none; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-family:inherit;">삭제</button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            // Charts
+            function makeBarChart(data, map, containerId) {
+                const counts = {};
+                allData.forEach(r => {
+                    const val = r[data];
+                    if (Array.isArray(val)) {
+                        val.forEach(v => { const k = map[v] || v; counts[k] = (counts[k]||0)+1; });
+                    } else if (val) {
+                        const k = map[val] || val; counts[k] = (counts[k]||0)+1;
+                    }
+                });
+                const max = Math.max(...Object.values(counts), 1);
+                const html = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
+                    const pct = Math.round((v/max)*100);
+                    return `<div style="display:flex; align-items:center; margin-bottom:6px;">
+                        <div style="width:80px; font-size:12px; color:#666;">${k}</div>
+                        <div style="flex:1; background:#f0f0f0; border-radius:6px; height:20px; overflow:hidden;">
+                            <div style="width:${pct}%; background:linear-gradient(90deg,#667eea,#764ba2); height:100%; border-radius:6px; transition:width 0.5s;"></div>
+                        </div>
+                        <div style="width:40px; text-align:right; font-size:12px; color:#333; font-weight:bold;">${v}</div>
+                    </div>`;
+                }).join('');
+                document.getElementById(containerId).innerHTML = html || '<div style="color:#999;">아직 데이터가 없습니다</div>';
+            }
+
+            makeBarChart('medical', medMap, 'medicalChart');
+            makeBarChart('culture', cultMap, 'cultureChart');
+            makeBarChart('hobby', hobbyMap, 'hobbyChart');
+
+            // Suggestions
+            const suggestions = allData.filter(r => r.suggestions).map((r,i) => 
+                `<div style="padding:10px; border-bottom:1px solid #f0f0f0;">
+                    <div style="font-size:11px; color:#888; margin-bottom:4px;">#${i+1} · ${natMap[r.nationality] || '-'} · ${new Date(r.timestamp).toLocaleDateString('ko-KR')}</div>
+                    <div style="color:#333;">${r.suggestions}</div>
+                </div>`
+            ).join('');
+            document.getElementById('suggestionsList').innerHTML = suggestions || '<div style="color:#999; padding:10px;">아직 제안이 없습니다</div>';
+        }
+
+        function exportToCSV() {
+            const allData = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+            if (allData.length === 0) { alert('보낼 데이터가 없습니다.'); return; }
+
+            const natMap = {1:'방글라데시',2:'캄보디아',3:'미얀마',4:'베트남',5:'필리핀',6:'우즈베키스탄',7:'인도네시아',8:'몽골',9:'네팔',10:'스리랑카',11:'중국',12:'키르기스스탄',13:'러시아',14:'태국',99:'기타'};
+            const ageMap = {1:'10대',2:'20대',3:'30대',4:'40대',5:'50대',6:'60대+'};
+            const genderMap = {1:'남성',2:'여성'};
+            const resMap = {1:'1년미만',2:'1-3년',3:'3-5년',4:'5년이상'};
+            const korMap = {1:'전혀못함',2:'간단히가능',3:'일상대화',4:'능숙'};
+            const medMap = {1:'내과',2:'치과',3:'정형외과',4:'안과',5:'피부과',6:'한의과'};
+            const cultMap = {1:'역사명소',2:'놀이공원',3:'자연휴양',4:'박물관',5:'축제시장'};
+            const hobbyMap = {1:'요리',2:'스포츠',3:'K-Pop',4:'공예',5:'IT',6:'사진'};
+
+            const headers = ['번호','응답시간','국적','연령대','성별','거주기간','한국어수준','진료과목','문화체험','취미수업','제안'];
+            const rows = allData.map((r,i) => [
+                i+1,
+                new Date(r.timestamp).toLocaleString('ko-KR'),
+                natMap[r.nationality] || r.nationality || '',
+                ageMap[r.age] || r.age || '',
+                genderMap[r.gender] || r.gender || '',
+                resMap[r.residence] || r.residence || '',
+                korMap[r.korean_level] || r.korean_level || '',
+                (Array.isArray(r.medical) ? r.medical.map(v=>medMap[v]||v).join(';') : (medMap[r.medical] || r.medical || '')),
+                cultMap[r.culture] || r.culture || '',
+                (Array.isArray(r.hobby) ? r.hobby.map(v=>hobbyMap[v]||v).join(';') : (hobbyMap[r.hobby] || r.hobby || '')),
+                (r.suggestions || '').replace(/,/g, '，')
+            ]);
+
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'survey_results_' + new Date().toISOString().slice(0,10) + '.csv';
+            link.click();
+        }
+
+        // Event delegation for all buttons (listen on body to catch dashboard clicks too)
+        document.body.addEventListener('click', function(e) {
+            // Walk up the DOM to find element with data-action
+            var btn = e.target;
+            while (btn && btn !== document.body) {
+                if (btn.hasAttribute && btn.hasAttribute('data-action')) break;
+                btn = btn.parentElement;
+            }
+            if (!btn || !btn.hasAttribute || !btn.hasAttribute('data-action')) return;
+
+            var action = btn.getAttribute('data-action');
+            console.log('Action:', action, 'Target:', e.target.tagName);
+
+            switch(action) {
+                case 'next':
+                    e.preventDefault();
+                    nextStep();
+                    break;
+                case 'prev':
+                    e.preventDefault();
+                    prevStep();
+                    break;
+                case 'submit':
+                    e.preventDefault();
+                    submitSurvey();
+                    break;
+                case 'admin-login':
+                    e.preventDefault();
+                    showAdminLogin();
+                    break;
+                case 'select-nationality':
+                    e.preventDefault();
+                    selectNationality(btn, btn.getAttribute('data-value'));
+                    break;
+                case 'select-option':
+                    e.preventDefault();
+                    selectOption(btn, btn.getAttribute('data-category'), btn.getAttribute('data-value'));
+                    break;
+                case 'select-single':
+                    e.preventDefault();
+                    selectSingle(btn, btn.getAttribute('data-category'), btn.getAttribute('data-value'));
+                    break;
+                case 'select-likert':
+                    e.preventDefault();
+                    selectLikert(btn, btn.getAttribute('data-category'), btn.getAttribute('data-value'));
+                    break;
+                case 'toggle-multi':
+                    e.preventDefault();
+                    toggleMultiSelect(btn, btn.getAttribute('data-category'), btn.getAttribute('data-value'));
+                    break;
+                case 'set-lang':
+                    e.preventDefault();
+                    setLang(btn.getAttribute('data-lang'));
+                    break;
+                case 'close-admin-login':
+                    e.preventDefault();
+                    closeAdminLogin();
+                    break;
+                case 'check-admin-login':
+                    e.preventDefault();
+                    checkAdminLogin();
+                    break;
+                case 'close-admin-dashboard':
+                    e.preventDefault();
+                    closeAdminDashboard();
+                    break;
+                case 'delete-all':
+                    e.preventDefault();
+                    deleteAllResponses();
+                    break;
+                case 'export-csv':
+                    e.preventDefault();
+                    exportToCSV();
+                    break;
+                case 'delete-response':
+                    e.preventDefault();
+                    var idx = parseInt(btn.getAttribute('data-index'));
+                    console.log('Delete clicked for index:', idx);
+                    showDeleteModal(idx);
+                    break;
+                case 'cancel-delete':
+                    e.preventDefault();
+                    closeDeleteModal();
+                    break;
+                case 'confirm-delete':
+                    e.preventDefault();
+                    confirmDelete();
+                    break;
+            }
+        });
+
+        // 초기화
+        updateProgress();
+    </script>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:20px; padding:40px; max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); text-align:center;">
+            <div style="font-size:40px; margin-bottom:15px;">🔐</div>
+            <h2 style="font-size:20px; color:#333; margin-bottom:8px;">관리자 로그인</h2>
+            <p style="font-size:13px; color:#888; margin-bottom:20px;">설문 결과를 확인하려면 비밀번호를 입력하세요</p>
+            <input type="password" id="adminPassword" placeholder="비밀번호 입력" style="width:100%; padding:14px; border:2px solid #e8e8e8; border-radius:12px; font-size:14px; margin-bottom:15px; font-family:inherit; box-sizing:border-box;">
+            <div id="loginError" style="color:#e74c3c; font-size:12px; margin-bottom:10px; display:none;">비밀번호가 올바르지 않습니다</div>
+            <div style="display:flex; gap:10px;">
+                <button type="button" data-action="close-admin-login" style="flex:1; padding:12px; border:2px solid #e0e0e0; background:white; border-radius:12px; font-size:14px; cursor:pointer; font-family:inherit; color:#666;">취소</button>
+                <button type="button" data-action="check-admin-login" style="flex:1; padding:12px; border:none; background:linear-gradient(135deg, #667eea, #764ba2); color:white; border-radius:12px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:bold;">로그인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f7fa; z-index:999; overflow-y:auto;">
+        <div style="max-width:1200px; margin:0 auto; padding:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1 style="font-size:24px; color:#333;">📊 설문조사 관리자 대시보드</h1>
+                <button type="button" data-action="close-admin-dashboard" style="background:#e74c3c; color:white; border:none; padding:10px 20px; border-radius:12px; font-size:14px; cursor:pointer; font-family:inherit;">✕ 닫기</button>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:25px;">
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size:12px; color:#888; margin-bottom:5px;">총 응답자 수</div>
+                    <div id="totalResponses" style="font-size:32px; font-weight:bold; color:#667eea;">0</div>
+                </div>
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size:12px; color:#888; margin-bottom:5px;">오늘 응답</div>
+                    <div id="todayResponses" style="font-size:32px; font-weight:bold; color:#2ecc71;">0</div>
+                </div>
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size:12px; color:#888; margin-bottom:5px;">국적 분포 (Top 3)</div>
+                    <div id="topNationalities" style="font-size:14px; color:#333; line-height:1.6;">-</div>
+                </div>
+            </div>
+
+            <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:20px;">
+                <h3 style="font-size:16px; color:#333; margin-bottom:15px;">📋 전체 응답 목록</h3>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:#f8f9fa;">
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">#</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">응답시간</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">국적</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">연령</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">성별</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">거주기간</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">한국어</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">진료과목</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">문화체험</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">취미수업</th>
+                                <th style="padding:10px; text-align:left; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666;">제안</th>
+                                <th style="padding:10px; text-align:center; border-bottom:2px solid #e0e0e0; font-weight:bold; color:#666; width:60px;">삭제</th>
+                            </tr>
+                        </thead>
+                        <tbody id="responsesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:15px; margin-bottom:20px;">
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <h3 style="font-size:16px; color:#333; margin-bottom:15px;">🏥 필요 진료과목 분포</h3>
+                    <div id="medicalChart" style="font-size:13px; line-height:1.8;"></div>
+                </div>
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <h3 style="font-size:16px; color:#333; margin-bottom:15px;">🎭 문화체험 선호도</h3>
+                    <div id="cultureChart" style="font-size:13px; line-height:1.8;"></div>
+                </div>
+                <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                    <h3 style="font-size:16px; color:#333; margin-bottom:15px;">🎨 취미수업 선호도</h3>
+                    <div id="hobbyChart" style="font-size:13px; line-height:1.8;"></div>
+                </div>
+            </div>
+
+            <div style="background:white; border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="font-size:16px; color:#333;">💬 제안 및 의견</h3>
+                    <button type="button" data-action="export-csv" style="background:#667eea; color:white; border:none; padding:8px 16px; border-radius:8px; font-size:12px; cursor:pointer; font-family:inherit;">📥 CSV보내기</button>
+                </div>
+                <div id="suggestionsList" style="font-size:13px; line-height:1.8; max-height:300px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:white; border-radius:20px; padding:35px; max-width:350px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); text-align:center;">
+            <div style="font-size:45px; margin-bottom:12px;">⚠️</div>
+            <h2 style="font-size:18px; color:#333; margin-bottom:8px;">응답 삭제</h2>
+            <p style="font-size:14px; color:#666; margin-bottom:20px; line-height:1.5;">정말 이 응답을 삭제하시겠습니까?<br>삭제된 데이터는 복구할 수 없습니다.</p>
+            <div style="display:flex; gap:10px;">
+                <button type="button" data-action="cancel-delete" style="flex:1; padding:12px; border:2px solid #e0e0e0; background:white; border-radius:12px; font-size:14px; cursor:pointer; font-family:inherit; color:#666;">취소</button>
+                <button type="button" data-action="confirm-delete" style="flex:1; padding:12px; border:none; background:#e74c3c; color:white; border-radius:12px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:bold;">삭제</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
