@@ -1384,38 +1384,44 @@
         const GITHUB_CONFIG = {
             owner: 'centbro',
             repo: 'hwaseong-survey',
-            token: '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',  // GitHub Personal Access Token 입력 필요
+            token: '',  // GitHub Personal Access Token 입력 필요
             issueTitle: '설문 응답'
         };
 
-        function isGitHubConfigured() {
-            return GITHUB_CONFIG.token && GITHUB_CONFIG.token.length > 0;
+        function isFormspreeConfigured() {
+            return FORMSPREE_CONFIG.endpoint && FORMSPREE_CONFIG.endpoint.length > 0 && FORMSPREE_CONFIG.enabled;
         }
 
-        async function saveToGitHub(data) {
-            if (!isGitHubConfigured()) {
-                throw new Error('GitHub token not configured');
+        async function saveToFormspree(data) {
+            if (!isFormspreeConfigured()) {
+                throw new Error('Formspree not configured');
             }
 
-            const body = formatSurveyData(data);
+            // Format data for Formspree
+            const formData = new FormData();
+            formData.append('nationality', data.nationality || '');
+            formData.append('age', data.age || '');
+            formData.append('gender', data.gender || '');
+            formData.append('residence', data.residence || '');
+            formData.append('korean_level', data.korean_level || '');
+            formData.append('medical', Array.isArray(data.medical) ? data.medical.join(',') : (data.medical || ''));
+            formData.append('culture', data.culture || '');
+            formData.append('hobby', Array.isArray(data.hobby) ? data.hobby.join(',') : (data.hobby || ''));
+            formData.append('suggestions', data.suggestions || '');
+            formData.append('timestamp', data.timestamp || new Date().toISOString());
+            formData.append('_subject', '화성시외국인복지센터 설문 응답');
 
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues`, {
+            const response = await fetch(FORMSPREE_CONFIG.endpoint, {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: `${GITHUB_CONFIG.issueTitle} - ${new Date().toLocaleString('ko-KR')}`,
-                    body: body,
-                    labels: ['survey-response']
-                })
+                    'Accept': 'application/json'
+                }
             });
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Failed to save');
+                throw new Error(error.error || 'Failed to save');
             }
 
             return await response.json();
@@ -1454,98 +1460,32 @@
 *자동 생성된 설문 응답*`;
         }
 
-        async function loadFromGitHub() {
-            if (!isGitHubConfigured()) {
-                throw new Error('GitHub token not configured');
-            }
-
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues?labels=survey-response&state=all&per_page=100`, {
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load');
-            }
-
-            const issues = await response.json();
-
-            // Parse GitHub issues back to survey data format
-            return issues.map(function(issue) {
-                return parseIssueBody(issue.body, issue.created_at, issue.number);
-            }).filter(function(d) { return d !== null; });
+        async function loadFromFormspree() {
+            // Formspree free tier doesn't provide a GET API for submissions
+            // Admin dashboard uses localStorage only
+            // For full admin features, upgrade to Formspree Gold or use webhook
+            throw new Error('Formspree free tier does not support data retrieval. Use localStorage fallback.');
         }
 
-        function parseIssueBody(body, createdAt, issueNumber) {
-            // Simple parsing from markdown table
-            const data = { timestamp: createdAt, issueNumber: issueNumber };
-
-            const natMap = {'방글라데시':'1','캄보디아':'2','미얀마':'3','베트남':'4','필리핀':'5','우즈베키스탄':'6','인도네시아':'7','몽골':'8','네팔':'9','스리랑카':'10','중국':'11','키르기스스탄':'12','러시아':'13','태국':'14','기타':'99'};
-
-            const lines = body.split('\n');
-            lines.forEach(function(line) {
-                const match = line.match(/\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/);
-                if (match) {
-                    const key = match[1].trim();
-                    const val = match[2].trim();
-
-                    if (key === '국적') data.nationality = natMap[val] || val;
-                    if (key === '연령대') {
-                        const ageMap = {'10대':'1','20대':'2','30대':'3','40대':'4','50대':'5','60대+':'6'};
-                        data.age = ageMap[val] || val;
-                    }
-                    if (key === '성별') {
-                        const genderMap = {'남성':'1','여성':'2'};
-                        data.gender = genderMap[val] || val;
-                    }
-                    if (key === '거주기간') {
-                        const resMap = {'1년미만':'1','1-3년':'2','3-5년':'3','5년이상':'4'};
-                        data.residence = resMap[val] || val;
-                    }
-                    if (key === '한국어수준') {
-                        const korMap = {'전혀못함':'1','간단히가능':'2','일상대화':'3','능숙':'4'};
-                        data.korean_level = korMap[val] || val;
-                    }
-                    if (key === '진료과목') {
-                        const medMap = {'내과':'1','치과':'2','정형외과':'3','안과':'4','피부과':'5','한의과':'6'};
-                        data.medical = val.split(', ').map(function(v) { return medMap[v.trim()] || v.trim(); }).filter(function(v) { return v && v !== '-'; });
-                    }
-                    if (key === '문화체험') {
-                        const cultMap = {'역사명소':'1','놀이공원':'2','자연휴양':'3','박물관':'4','축제시장':'5'};
-                        data.culture = cultMap[val] || val;
-                    }
-                    if (key === '취미수업') {
-                        const hobbyMap = {'요리':'1','스포츠':'2','K-Pop':'3','공예':'4','IT':'5','사진':'6'};
-                        data.hobby = val.split(', ').map(function(v) { return hobbyMap[v.trim()] || v.trim(); }).filter(function(v) { return v && v !== '-'; });
-                    }
-                    if (key === '제안') data.suggestions = val !== '-' ? val : '';
-                }
-            });
-
-            return data;
+        function parseFormspreeData(formData) {
+            // Parse Formspree submission data
+            return {
+                nationality: formData.nationality || '',
+                age: formData.age || '',
+                gender: formData.gender || '',
+                residence: formData.residence || '',
+                korean_level: formData.korean_level || '',
+                medical: formData.medical ? formData.medical.split(',') : [],
+                culture: formData.culture || '',
+                hobby: formData.hobby ? formData.hobby.split(',') : [],
+                suggestions: formData.suggestions || '',
+                timestamp: formData.timestamp || new Date().toISOString()
+            };
         }
 
-        async function deleteFromGitHub(issueNumber) {
-            if (!isGitHubConfigured()) {
-                throw new Error('GitHub token not configured');
-            }
-
-            const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${issueNumber}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    state: 'closed',
-                    labels: ['survey-response', 'deleted']
-                })
-            });
-
-            return response.ok;
+        async function deleteFromFormspree(id) {
+            // Formspree free tier does not support deletion via API
+            return false;
         }
 
         
@@ -1636,15 +1576,15 @@
             // Show GitHub status
             var statusEl = document.getElementById('githubStatus');
             if (statusEl) {
-                if (!isGitHubConfigured()) {
+                if (!isFormspreeConfigured()) {
                     statusEl.style.display = 'block';
-                    statusEl.innerHTML = '⚠️ <strong>GitHub 연동 안됨:</strong> 데이터가 이 브라우저에만 저장됩니다. 서버 저장을 위해 설정이 필요합니다. <a href="https://github.com/centbro/hwaseong-survey/issues" target="_blank" style="color:#856404; text-decoration:underline;">GitHub Issues에서 직접 확인 →</a>';
+                    statusEl.innerHTML = '⚠️ <strong>서버 연동 안됨:</strong> 데이터가 이 브라우저에만 저장됩니다. 다른 기기에서도 저장하려면 Formspree 설정이 필요합니다.';
                 } else {
                     statusEl.style.display = 'block';
                     statusEl.style.background = '#d4edda';
                     statusEl.style.borderColor = '#28a745';
                     statusEl.style.color = '#155724';
-                    statusEl.innerHTML = '✅ <strong>GitHub 연동됨:</strong> 데이터가 GitHub 서버에 저장되고 있습니다. <a href="https://github.com/centbro/hwaseong-survey/issues?label=survey-response" target="_blank" style="color:#155724; text-decoration:underline;">GitHub Issues에서 전체 확인 →</a>';
+                    statusEl.innerHTML = '✅ <strong>Formspree 연동됨:</strong> 데이터가 서버에 저장됩니다. 관리자 대시보드는 이 브라우저의 로컬 데이터만 표시합니다.';
                 }
             }
 
@@ -1737,16 +1677,7 @@
         }
 
         function exportToCSV() {
-            var allData = [];
-
-            if (isGitHubConfigured()) {
-                // This is async but we'll use a synchronous approach for simplicity
-                // In production, this should be handled properly
-                alert('GitHub 연동 시 CSV보내기는 GitHub Issues 페이지에서 직접 확인하세요.\n\nhttps://github.com/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo + '/issues?label=survey-response');
-                return;
-            }
-
-            allData = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+            var allData = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
             if (allData.length === 0) { alert('보낼 데이터가 없습니다.'); return; }
 
             const natMap = {1:'방글라데시',2:'캄보디아',3:'미얀마',4:'베트남',5:'필리핀',6:'우즈베키스탄',7:'인도네시아',8:'몽골',9:'네팔',10:'스리랑카',11:'중국',12:'키르기스스탄',13:'러시아',14:'태국',99:'기타'};
